@@ -66,7 +66,7 @@
   <header>
     <div>
       <h1>90kg → 85kg Daily AI Tracker</h1>
-      <div class="sub">Blank Daily Log | Gemini 3.8 Flash | Activity + Health Override</div>
+      <div class="sub">Gemini 1.5 Flash | Direct API Parser</div>
     </div>
     <div style="display:flex; gap:6px;">
       <button class="btn btn-sm" onclick="toggleSettings()">⚙️ Profile & API Key</button>
@@ -88,20 +88,14 @@
       <div><label>Daily Deficit (kcal)</label><input type="number" id="deficit" step="50" onchange="saveProfile()"></div>
       <div><label>Protein Target (g)</label><input type="number" id="proteinGoal" onchange="saveProfile()"></div>
     </div>
-    <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:8px;">
-      <div>
-        <label>Google Gemini API Key</label>
+    <div>
+      <label>Google Gemini API Key</label>
+      <div style="display:flex; gap:6px;">
         <input type="password" id="geminiKey" placeholder="Paste AQ.Ab... or AIzaSy... key" onchange="saveProfile()">
+        <button class="btn btn-primary btn-sm" style="white-space:nowrap;" onclick="testGeminiKey()">Test Key</button>
       </div>
-      <div>
-        <label>Gemini Model</label>
-        <div style="display:flex; gap:6px;">
-          <input type="text" id="geminiModel" value="models/gemini-3.8-flash" onchange="saveProfile()">
-          <button class="btn btn-primary btn-sm" style="white-space:nowrap;" onclick="testGeminiKey()">Test Key</button>
-        </div>
-      </div>
+      <div id="keyStatus" class="sub" style="margin-top:5px;">Using stable <code>gemini-1.5-flash</code>.</div>
     </div>
-    <div id="keyStatus" class="sub" style="margin-top:6px;">Defaults to <code>models/gemini-3.8-flash</code>. Tap Test Key to verify.</div>
   </div>
 
   <div class="card" style="padding:10px 14px;">
@@ -192,7 +186,7 @@
   <div id="mealsContainer"></div>
 
 <script>
-const STORAGE_KEY = "jaspreet_ai_tracker_v4";
+const STORAGE_KEY = "jaspreet_ai_tracker_v6";
 
 const MEAL_SLOTS = [
   { id: "breakfast", name: "1. Breakfast", chips: ["6 egg whites + 1 whole egg", "2 slices whole wheat toast", "1 tbsp peanut butter", "1 bowl poha"] },
@@ -200,47 +194,6 @@ const MEAL_SLOTS = [
   { id: "lunch", name: "3. Lunch", chips: ["1.5 roti + 1 bowl dal", "150g cooked rice + 1 bowl rajma", "200g 1% cottage cheese", "1 bowl aloo gobhi sabzi"] },
   { id: "snack", name: "4. Evening Tea & Snack", chips: ["1 cup masala chai", "1 scoop whey protein", "25g roasted peanuts", "20g almonds & walnuts"] },
   { id: "dinner", name: "5. Dinner", chips: ["3 idli + 1 bowl sambar", "50g soya chunks stir fry", "200g 1% cottage cheese", "200g chicken breast curry"] }
-];
-
-const OFFLINE_FOODS = [
-  { keywords: ["egg white", "white egg"], name: "Egg White", kcal: 17, p: 3.6, c: 0.2, f: 0 },
-  { keywords: ["whole egg", "egg"], name: "Whole Egg", kcal: 72, p: 6.3, c: 0.4, f: 4.8 },
-  { keywords: ["idli"], name: "Idli", kcal: 60, p: 2, c: 12, f: 0.4 },
-  { keywords: ["sambar", "sambhar"], name: "Sambar (bowl)", kcal: 135, p: 5, c: 20, f: 4 },
-  { keywords: ["dosa"], name: "Plain Dosa", kcal: 165, p: 4, c: 28, f: 4 },
-  { keywords: ["roti", "chapati", "phulka"], name: "Whole Wheat Roti", kcal: 110, p: 3.5, c: 22, f: 1 },
-  { keywords: ["rice"], name: "Cooked White Rice (150g bowl)", kcal: 195, p: 4, c: 43, f: 0.4 },
-  { keywords: ["dal"], name: "Yellow Dal Tadka (bowl)", kcal: 180, p: 9, c: 26, f: 4.5 },
-  { keywords: ["rajma", "chole", "chana"], name: "Rajma / Chole Curry (bowl)", kcal: 220, p: 11, c: 32, f: 5 },
-  { keywords: ["cottage cheese"], name: "1-2% Cottage Cheese (200g)", kcal: 165, p: 24, c: 8, f: 3 },
-  { keywords: ["paneer"], name: "Indian Paneer (100g)", kcal: 265, p: 18, c: 3, f: 20 },
-  { keywords: ["chicken"], name: "Chicken Breast Curry/Tikka (200g)", kcal: 330, p: 62, c: 3, f: 7 },
-  { keywords: ["whey"], name: "Whey Protein (scoop)", kcal: 120, p: 25, c: 2, f: 1.5 },
-  { keywords: ["peanut butter"], name: "Peanut Butter (tbsp)", kcal: 95, p: 4, c: 3, f: 8 },
-  { keywords: ["peanut", "peanuts"], name: "Roasted Peanuts (25g handful)", kcal: 145, p: 6.5, c: 4, f: 12.5 },
-  { keywords: ["almond", "walnut", "nuts"], name: "Mixed Nuts (20g)", kcal: 120, p: 4, c: 3, f: 11 },
-  { keywords: ["chai", "tea"], name: "Indian Milk Tea / Chai (cup)", kcal: 70, p: 3, c: 8, f: 2.5 },
-  { keywords: ["banana"], name: "Medium Banana", kcal: 105, p: 1.3, c: 27, f: 0.4 },
-  { keywords: ["apple"], name: "Medium Apple", kcal: 95, p: 0.5, c: 25, f: 0.3 },
-  { keywords: ["orange"], name: "Medium Orange", kcal: 85, p: 1.5, c: 21, f: 0.2 },
-  { keywords: ["berries"], name: "Mixed Berries (150g)", kcal: 75, p: 1, c: 17, f: 0.4 },
-  { keywords: ["toast", "bread"], name: "Whole Wheat Toast (slice)", kcal: 80, p: 3.5, c: 14, f: 1 },
-  { keywords: ["poha", "upma"], name: "Poha / Upma (bowl)", kcal: 250, p: 5, c: 42, f: 7 },
-  { keywords: ["soya"], name: "Soya Chunks Stir-Fry (50g dry)", kcal: 172, p: 26, c: 16, f: 0.5 },
-  { keywords: ["sabzi", "gobhi", "bhindi"], name: "Mixed Vegetable Sabzi (bowl)", kcal: 135, p: 3, c: 14, f: 7 }
-];
-
-const WORD_NUMS = {
-  "half": 0.5, "a": 1, "an": 1, "one": 1, "two": 2, "three": 3, "four": 4,
-  "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10
-};
-
-// Updated model priority with gemini-3.8-flash first
-const CANDIDATE_MODELS = [
-  "models/gemini-3.8-flash",
-  "models/gemini-3.5-flash",
-  "models/gemini-3.0-flash",
-  "models/gemini-2.5-flash"
 ];
 
 let state = {
@@ -251,8 +204,7 @@ let state = {
     age: 38,
     deficit: 600,
     proteinGoal: 160,
-    geminiKey: "",
-    geminiModel: "models/gemini-3.8-flash"
+    geminiKey: ""
   },
   currentDate: new Date().toISOString().split("T")[0],
   days: {}
@@ -268,15 +220,11 @@ function ensureDay(dateStr) {
 }
 
 function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("jaspreet_ai_tracker_v3") || localStorage.getItem("jaspreet_ai_tracker_v2");
+  const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("jaspreet_ai_tracker_v5") || localStorage.getItem("jaspreet_ai_tracker_v4");
   if (raw) {
     try {
       const parsed = JSON.parse(raw);
       state = { ...state, ...parsed, profile: { ...state.profile, ...(parsed.profile || {}) } };
-      // Upgrade any old cached 2.5 model to 3.8 automatically
-      if (!state.profile.geminiModel || state.profile.geminiModel.includes("2.5")) {
-        state.profile.geminiModel = "models/gemini-3.8-flash";
-      }
     } catch (e) { console.error(e); }
   }
   ensureDay(state.currentDate);
@@ -297,7 +245,6 @@ function syncProfileInputs() {
   document.getElementById("deficit").value = state.profile.deficit;
   document.getElementById("proteinGoal").value = state.profile.proteinGoal;
   document.getElementById("geminiKey").value = state.profile.geminiKey || "";
-  document.getElementById("geminiModel").value = state.profile.geminiModel || "models/gemini-3.8-flash";
   document.getElementById("currentDate").value = state.currentDate;
 }
 
@@ -309,9 +256,6 @@ function saveProfile() {
   state.profile.deficit = parseFloat(document.getElementById("deficit").value) || 600;
   state.profile.proteinGoal = parseFloat(document.getElementById("proteinGoal").value) || 160;
   state.profile.geminiKey = document.getElementById("geminiKey").value.trim();
-  let m = document.getElementById("geminiModel").value.trim() || "models/gemini-3.8-flash";
-  if (!m.startsWith("models/")) m = "models/" + m;
-  state.profile.geminiModel = m;
   saveState();
   autoCalcWorkoutBurn();
   renderAll();
@@ -403,11 +347,11 @@ async function testGeminiKey() {
     return;
   }
   statusEl.style.color = "var(--accent)";
-  statusEl.textContent = `Testing ${state.profile.geminiModel}...`;
+  statusEl.textContent = "Testing connection with Gemini 1.5 Flash...";
   try {
     const items = await callGeminiFoodParser(key, "1 boiled egg white");
     statusEl.style.color = "var(--success)";
-    statusEl.textContent = `Success! ${state.profile.geminiModel} responded (${items[0]?.kcal || 17} kcal).`;
+    statusEl.textContent = `Success! Connected (${items[0]?.kcal || 17} kcal).`;
   } catch (e) {
     statusEl.style.color = "var(--danger)";
     statusEl.textContent = `Error: ${e.message}`;
@@ -419,65 +363,39 @@ async function callGeminiFoodParser(apiKey, query) {
 Return ONLY a raw JSON array of objects with exact estimated macros. Do not wrap in markdown or backticks.
 Example format: [{"name":"2 Large Egg Whites","kcal":34,"p":7,"c":0,"f":0}]`;
 
-  const modelsToTry = [
-    state.profile.geminiModel || "models/gemini-3.8-flash",
-    ...CANDIDATE_MODELS.filter(m => m !== state.profile.geminiModel)
-  ];
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 7000);
 
-  let lastError = "Unknown error";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey
+    },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.1 }
+    }),
+    signal: controller.signal
+  });
+  clearTimeout(timeoutId);
 
-  for (const modelName of modelsToTry) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1 }
-      })
-    });
-
-    if (res.ok) {
-      // Save working model so future calls are instant
-      state.profile.geminiModel = modelName;
-      document.getElementById("geminiModel").value = modelName;
-      saveState();
-
-      const data = await res.json();
-      let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-      rawText = rawText.replace(/```json|```/gi, "").trim();
-      const bracketStart = rawText.indexOf("[");
-      const bracketEnd = rawText.lastIndexOf("]");
-      if (bracketStart !== -1 && bracketEnd !== -1) {
-        rawText = rawText.slice(bracketStart, bracketEnd + 1);
-      }
-      return JSON.parse(rawText);
-    }
-
+  if (!res.ok) {
     const errObj = await res.json().catch(() => ({}));
-    lastError = errObj?.error?.message || `HTTP ${res.status}`;
-
-    // If Google error message explicitly names a replacement model (e.g., models/gemini-3.8-flash), extract and try it immediately
-    const suggestedMatch = lastError.match(/models\/gemini-[a-z0-9.-]+/i);
-    if (suggestedMatch && !modelsToTry.includes(suggestedMatch[0])) {
-      modelsToTry.push(suggestedMatch[0]);
-    }
+    throw new Error(errObj?.error?.message || `HTTP ${res.status}`);
   }
 
-  throw new Error(lastError);
-}
-
-function extractQuantity(lowerStr) {
-  const numMatch = lowerStr.match(/(\d+(\.\d+)?)/);
-  if (numMatch) return parseFloat(numMatch[1]);
-  const words = lowerStr.split(/\s+/);
-  for (const w of words) {
-    if (WORD_NUMS[w] !== undefined) return WORD_NUMS[w];
+  const data = await res.json();
+  let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+  rawText = rawText.replace(/```json|```/gi, "").trim();
+  const bracketStart = rawText.indexOf("[");
+  const bracketEnd = rawText.lastIndexOf("]");
+  if (bracketStart !== -1 && bracketEnd !== -1) {
+    rawText = rawText.slice(bracketStart, bracketEnd + 1);
   }
-  return 1;
+  return JSON.parse(rawText);
 }
 
 async function parseFoodInput(slotId, presetText) {
@@ -487,68 +405,36 @@ async function parseFoodInput(slotId, presetText) {
   if (!query) return;
 
   const apiKey = state.profile.geminiKey;
-  if (apiKey && apiKey.length >= 15) {
-    btnEl.disabled = true;
-    btnEl.innerHTML = `<span class="spinner"></span> AI...`;
-    try {
-      const items = await callGeminiFoodParser(apiKey, query);
-      if (Array.isArray(items) && items.length > 0) {
-        items.forEach(it => {
-          state.days[state.currentDate].meals[slotId].push({
-            name: it.name || query,
-            kcal: Math.round(Number(it.kcal) || 0),
-            p: Math.round(Number(it.p) || 0),
-            c: Math.round(Number(it.c) || 0),
-            f: Math.round(Number(it.f) || 0)
-          });
-        });
-        inputEl.value = "";
-        saveState();
-        renderAll();
-        return;
-      }
-    } catch (err) {
-      alert(`Gemini API Error (${err.message}). Using built-in offline calculator instead.`);
-    } finally {
-      btnEl.disabled = false;
-      btnEl.textContent = "Calculate & Add";
-    }
+  if (!apiKey || apiKey.length < 15) {
+    alert("Please enter your Gemini API key in ⚙️ Profile & API Key first so AI can parse your Indian meals accurately.");
+    return;
   }
 
-  const parts = query.split(/\s*(?:\+|,|\band\b)\s*/i).filter(Boolean);
-  parts.forEach(part => {
-    const lower = part.toLowerCase();
-    const num = extractQuantity(lower);
+  btnEl.disabled = true;
+  btnEl.innerHTML = `<span class="spinner"></span> AI...`;
 
-    let matched = null;
-    for (const entry of OFFLINE_FOODS) {
-      if (entry.keywords.some(k => lower.includes(k))) {
-        matched = entry;
-        break;
-      }
-    }
-
-    if (matched) {
-      const isGramInput = /\b\d+\s*g\b/.test(lower) && num >= 25;
-      const mult = isGramInput ? 1 : num;
-      state.days[state.currentDate].meals[slotId].push({
-        name: `${part.trim()}`,
-        kcal: Math.round(matched.kcal * mult),
-        p: Math.round(matched.p * mult),
-        c: Math.round(matched.c * mult),
-        f: Math.round(matched.f * mult)
+  try {
+    const items = await callGeminiFoodParser(apiKey, query);
+    if (Array.isArray(items) && items.length > 0) {
+      items.forEach(it => {
+        state.days[state.currentDate].meals[slotId].push({
+          name: it.name || query,
+          kcal: Math.round(Number(it.kcal) || 0),
+          p: Math.round(Number(it.p) || 0),
+          c: Math.round(Number(it.c) || 0),
+          f: Math.round(Number(it.f) || 0)
+        });
       });
-    } else {
-      state.days[state.currentDate].meals[slotId].push({
-        name: `${part.trim()} (Edit kcal if needed)`,
-        kcal: 150, p: 6, c: 20, f: 5
-      });
+      inputEl.value = "";
+      saveState();
+      renderAll();
     }
-  });
-
-  inputEl.value = "";
-  saveState();
-  renderAll();
+  } catch (err) {
+    alert(`Gemini AI Error: ${err.message}. Please check your API key.`);
+  } finally {
+    btnEl.disabled = false;
+    btnEl.textContent = "Calculate & Add";
+  }
 }
 
 function toggleManualRow(slotId) {
@@ -707,7 +593,7 @@ function renderAll() {
         </div>
         <div class="quick-chips">${chipsHTML}</div>
         <div class="ai-input-row">
-          <input type="text" id="food_in_${slot.id}" placeholder="Type what you ate (e.g., Egg 2 white)..." onkeydown="if(event.key==='Enter') parseFoodInput('${slot.id}')">
+          <input type="text" id="food_in_${slot.id}" placeholder="Type what you ate (e.g., Two white egg)..." onkeydown="if(event.key==='Enter') parseFoodInput('${slot.id}')">
           <button class="btn btn-primary" id="food_btn_${slot.id}" style="white-space:nowrap;" onclick="parseFoodInput('${slot.id}')">Calculate & Add</button>
           <button class="btn btn-sm" onclick="toggleManualRow('${slot.id}')">Manual</button>
         </div>
