@@ -21,50 +21,39 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 14px; max-width: 800px; margin: 0 auto; padding-bottom: 60px; }
-    
     header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
     h1 { font-size: 1.25rem; font-weight: 700; }
     .sub { font-size: 0.78rem; color: var(--muted); }
-    
     .btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
     .btn-primary { background: var(--accent); color: #0f172a; border-color: var(--accent); }
     .btn-danger { background: rgba(239,68,68,0.15); color: #fca5a5; border-color: var(--danger); }
     .btn-sm { padding: 5px 9px; font-size: 0.75rem; }
-
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
     .card-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-
     input, select { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 9px 10px; border-radius: 8px; font-size: 0.9rem; width: 100%; }
     label { font-size: 0.74rem; color: var(--muted); display: block; margin-bottom: 3px; }
-
     .equation-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; margin-bottom: 12px; }
     .eq-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 4px; }
     .eq-val { font-size: 1.05rem; font-weight: 700; }
     .eq-lbl { font-size: 0.68rem; color: var(--muted); }
-
     .status-banner { padding: 12px; border-radius: 10px; font-weight: 700; text-align: center; font-size: 0.95rem; margin-bottom: 12px; border: 1px solid; }
     .status-under { background: rgba(34, 197, 94, 0.12); border-color: var(--success); color: #86efac; }
     .status-over { background: rgba(239, 68, 68, 0.15); border-color: var(--danger); color: #fca5a5; }
-
     .macro-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .bar-wrap { background: var(--bg); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); }
     .bar-head { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 5px; }
     .bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
     .bar-fill { height: 100%; transition: width 0.2s; }
-
     .act-form { display: grid; grid-template-columns: 1.4fr 0.8fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 10px; }
     @media (max-width: 600px) { .act-form { grid-template-columns: 1fr 1fr; } }
-    
     .list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); margin-top: 6px; font-size: 0.85rem; gap: 8px; }
     .list-item-meta { color: var(--muted); font-size: 0.78rem; }
-
     .meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .meal-name { font-weight: 700; font-size: 0.95rem; }
     .meal-sub { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
     .ai-input-row { display: flex; gap: 6px; margin-bottom: 6px; }
     .manual-row { display: none; grid-template-columns: 1.5fr repeat(4, 1fr) auto; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); }
     @media (max-width: 600px) { .manual-row { grid-template-columns: 1fr 1fr; } }
-
     .quick-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 8px; }
     .chip { white-space: nowrap; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; padding: 4px 8px; border-radius: 99px; cursor: pointer; }
     .chip:hover { color: var(--text); border-color: var(--accent); }
@@ -77,7 +66,7 @@
   <header>
     <div>
       <h1>90kg → 85kg Daily AI Tracker</h1>
-      <div class="sub">Blank Daily Log | Auto-Model Gemini AI | Activity + Health Override</div>
+      <div class="sub">Blank Daily Log | Supports AQ. & AIza Keys | Activity + Health Override</div>
     </div>
     <div style="display:flex; gap:6px;">
       <button class="btn btn-sm" onclick="toggleSettings()">⚙️ Profile & API Key</button>
@@ -86,7 +75,6 @@
     </div>
   </header>
 
-  <!-- Collapsible Profile & Gemini API Settings -->
   <div id="settingsCard" class="card" style="display:none;">
     <div class="card-title">
       <span>Body Stats & Gemini API Key</span>
@@ -101,16 +89,15 @@
       <div><label>Protein Target (g)</label><input type="number" id="proteinGoal" onchange="saveProfile()"></div>
     </div>
     <div>
-      <label>Google Gemini API Key (Tap the Copy icon in AI Studio — starts with AIzaSy...)</label>
+      <label>Google Gemini API Key (Supports both AQ.Ab... and AIzaSy... keys)</label>
       <div style="display:flex; gap:6px;">
-        <input type="password" id="geminiKey" placeholder="Paste full AIzaSy... key here" onchange="saveProfile()">
+        <input type="password" id="geminiKey" placeholder="Paste AQ.Ab... or AIzaSy... key here" onchange="saveProfile()">
         <button class="btn btn-primary btn-sm" style="white-space:nowrap;" onclick="testGeminiKey()">Test Key</button>
       </div>
-      <div id="keyStatus" class="sub" style="margin-top:5px;">Auto-detects the active Gemini Flash model on your account to prevent 404 errors.</div>
+      <div id="keyStatus" class="sub" style="margin-top:5px;">Paste your key and tap Test Key to verify connection.</div>
     </div>
   </div>
 
-  <!-- Date Navigation -->
   <div class="card" style="padding:10px 14px;">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <button class="btn btn-sm" onclick="changeDate(-1)">◀ Prev Day</button>
@@ -120,7 +107,6 @@
     </div>
   </div>
 
-  <!-- Calorie Equation & Deficit Status -->
   <div class="card">
     <div class="card-title">1. Today's Calorie & Deficit Math</div>
     <div class="equation-grid">
@@ -166,7 +152,6 @@
     </div>
   </div>
 
-  <!-- Physical Activity Logger -->
   <div class="card">
     <div class="card-title">
       <span>2. Today's Physical Activities (Gym / Badminton / Pickleball / Walk)</span>
@@ -198,11 +183,10 @@
     <div id="activityList"></div>
   </div>
 
-  <!-- 5 Blank Meal Slots -->
   <div id="mealsContainer"></div>
 
 <script>
-const STORAGE_KEY = "jaspreet_ai_tracker_v2";
+const STORAGE_KEY = "jaspreet_ai_tracker_v3";
 
 const MEAL_SLOTS = [
   { id: "breakfast", name: "1. Breakfast", chips: ["6 egg whites + 1 whole egg", "2 slices whole wheat toast", "1 tbsp peanut butter", "1 bowl poha"] },
@@ -245,6 +229,12 @@ const WORD_NUMS = {
   "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10
 };
 
+const CANDIDATE_MODELS = [
+  "models/gemini-2.5-flash",
+  "models/gemini-2.0-flash",
+  "models/gemini-1.5-flash"
+];
+
 let state = {
   profile: {
     weight: 90,
@@ -270,7 +260,7 @@ function ensureDay(dateStr) {
 }
 
 function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("jaspreet_ai_tracker_v2");
   if (raw) {
     try {
       const parsed = JSON.parse(raw);
@@ -308,7 +298,7 @@ function saveProfile() {
   const newKey = document.getElementById("geminiKey").value.trim();
   if (newKey !== state.profile.geminiKey) {
     state.profile.geminiKey = newKey;
-    state.profile.detectedModel = ""; // Re-detect model on key change
+    state.profile.detectedModel = "";
   }
   saveState();
   autoCalcWorkoutBurn();
@@ -391,38 +381,68 @@ function editActivityKcal(idx, newVal) {
   }
 }
 
-// Auto-discover which Gemini model is active for this user's API key (fixes 404 errors)
 async function resolveGeminiModel(apiKey) {
   if (state.profile.detectedModel) return state.profile.detectedModel;
-  const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
-  if (!listRes.ok) {
-    const errText = await listRes.text();
-    throw new Error(`Key check failed (${listRes.status}). Make sure you copied the full key starting with AIzaSy.`);
-  }
-  const data = await listRes.json();
-  const models = (data.models || []).filter(m =>
-    Array.isArray(m.supportedGenerationMethods) &&
-    m.supportedGenerationMethods.includes("generateContent") &&
-    m.name.includes("gemini")
-  );
-  if (models.length === 0) throw new Error("No Gemini text models available for this key.");
 
-  // Prefer flash models for speed & free tier quota
-  const preferred = models.find(m => m.name.includes("flash") && !m.name.includes("8b")) ||
-                    models.find(m => m.name.includes("flash")) ||
-                    models[0];
-  state.profile.detectedModel = preferred.name; // e.g. "models/gemini-2.0-flash" or "models/gemini-2.5-flash"
-  saveState();
-  return state.profile.detectedModel;
+  try {
+    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`, {
+      headers: { "x-goog-api-key": apiKey }
+    });
+    if (listRes.ok) {
+      const data = await listRes.json();
+      const models = (data.models || []).filter(m =>
+        Array.isArray(m.supportedGenerationMethods) &&
+        m.supportedGenerationMethods.includes("generateContent") &&
+        m.name.includes("gemini")
+      );
+      if (models.length > 0) {
+        const preferred = models.find(m => m.name.includes("2.5-flash")) ||
+                          models.find(m => m.name.includes("flash") && !m.name.includes("8b")) ||
+                          models.find(m => m.name.includes("flash")) ||
+                          models[0];
+        state.profile.detectedModel = preferred.name;
+        saveState();
+        return state.profile.detectedModel;
+      }
+    }
+  } catch (e) {
+    console.warn("Model list check skipped, probing directly...", e);
+  }
+
+  let lastStatus = "";
+  for (const candidate of CANDIDATE_MODELS) {
+    const probeRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${candidate}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: "hi" }] }]
+      })
+    });
+    if (probeRes.ok) {
+      state.profile.detectedModel = candidate;
+      saveState();
+      return candidate;
+    }
+    lastStatus = `${probeRes.status}`;
+    if (probeRes.status === 401 || probeRes.status === 403) {
+      const errJson = await probeRes.json().catch(() => ({}));
+      const msg = errJson?.error?.message || `HTTP ${probeRes.status}`;
+      throw new Error(`${msg}`);
+    }
+  }
+  throw new Error(`Could not reach Gemini model (Last status: ${lastStatus}).`);
 }
 
 async function testGeminiKey() {
   saveProfile();
   const statusEl = document.getElementById("keyStatus");
   const key = state.profile.geminiKey;
-  if (!key || !key.startsWith("AIza")) {
+  if (!key || key.length < 15) {
     statusEl.style.color = "var(--danger)";
-    statusEl.textContent = "Invalid format: Your key must start with 'AIzaSy...' (tap the copy icon in Google AI Studio).";
+    statusEl.textContent = "Please paste your full Gemini API key (starts with AQ. or AIza).";
     return;
   }
   statusEl.style.color = "var(--accent)";
@@ -434,7 +454,7 @@ async function testGeminiKey() {
     statusEl.textContent = `Connected! Active model: ${modelName}`;
   } catch (e) {
     statusEl.style.color = "var(--danger)";
-    statusEl.textContent = e.message;
+    statusEl.textContent = `API Error: ${e.message}. (If Google rejects your AQ. key with 401, create a standard AIza key in console.cloud.google.com -> Credentials).`;
   }
 }
 
@@ -448,21 +468,26 @@ Example format: [{"name":"2 Large Egg Whites","kcal":34,"p":7,"c":0,"f":0}]`;
 
   let res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey
+    },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.1 }
     })
   });
 
-  // If cached model ever returns 404, re-detect once automatically
   if (res.status === 404) {
     state.profile.detectedModel = "";
     modelName = await resolveGeminiModel(apiKey);
     url = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
     res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.1 }
@@ -470,7 +495,10 @@ Example format: [{"name":"2 Large Egg Whites","kcal":34,"p":7,"c":0,"f":0}]`;
     });
   }
 
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const errObj = await res.json().catch(() => ({}));
+    throw new Error(errObj?.error?.message || `HTTP ${res.status}`);
+  }
   const data = await res.json();
   let rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
   rawText = rawText.replace(/```json|```/gi, "").trim();
@@ -499,7 +527,7 @@ async function parseFoodInput(slotId, presetText) {
   if (!query) return;
 
   const apiKey = state.profile.geminiKey;
-  if (apiKey && apiKey.startsWith("AIza")) {
+  if (apiKey && apiKey.length >= 15) {
     btnEl.disabled = true;
     btnEl.innerHTML = `<span class="spinner"></span> AI...`;
     try {
@@ -527,7 +555,6 @@ async function parseFoodInput(slotId, presetText) {
     }
   }
 
-  // Offline calculator with word-number support ("Two white egg" -> 2 * 17 = 34 kcal)
   const parts = query.split(/\s*(?:\+|,|\band\b)\s*/i).filter(Boolean);
   parts.forEach(part => {
     const lower = part.toLowerCase();
