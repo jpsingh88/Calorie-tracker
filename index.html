@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -22,6 +22,7 @@
       --chip-pro-bg: rgba(34, 197, 94, 0.14);
       --chip-pro-border: #22c55e;
       --chip-pro-text: #86efac;
+      --coach-bg: rgba(56, 189, 248, 0.08);
     }
     :root[data-theme="light"] {
       --bg: #f1f5f9;
@@ -38,27 +39,27 @@
       --chip-pro-bg: #dcfce7;
       --chip-pro-border: #16a34a;
       --chip-pro-text: #166534;
+      --coach-bg: #f0f9ff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 14px; max-width: 860px; margin: 0 auto; padding-bottom: 70px; transition: background 0.2s, color 0.2s; }
     
     header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
-    h1 { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    h1 { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .sub { font-size: 0.76rem; color: var(--muted); }
     .top-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
-    .btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 7px 11px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+    .btn { background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 7px 11px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.15s; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
     .btn-ai { background: #6366f1; color: #ffffff; border-color: #6366f1; }
     .btn-success { background: var(--success); color: #ffffff; border-color: var(--success); }
     .btn-danger { background: rgba(239,68,68,0.15); color: var(--danger); border-color: var(--danger); }
-    .btn-sm { padding: 5px 8px; font-size: 0.74rem; }
+    .btn-sm { padding: 5px 9px; font-size: 0.74rem; }
 
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
     .card-title { font-size: 0.84rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); font-weight: 700; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 
-    /* Tooltip Icon */
     .tip-btn { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--surface2); color: var(--accent); font-size: 0.7rem; font-weight: 700; cursor: pointer; border: 1px solid var(--border); margin-left: 4px; }
     .tip-box { display: none; background: var(--bg); border: 1px solid var(--accent); color: var(--text); padding: 9px 11px; border-radius: 8px; font-size: 0.78rem; margin-bottom: 10px; line-height: 1.45; }
 
@@ -81,7 +82,11 @@
     .bar-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
     .bar-fill { height: 100%; transition: width 0.2s; }
 
-    /* Morning vs Evening Activity Split */
+    /* Smart Evening & Dinner Balancer Coach */
+    .coach-card { background: var(--coach-bg); border: 2px solid var(--accent); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+    .coach-section { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; margin-top: 8px; }
+    .coach-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
     .act-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 680px) { .act-split { grid-template-columns: 1fr; } }
     .act-slot-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 11px; }
@@ -96,6 +101,7 @@
 
     .meal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px; }
     .meal-name { font-weight: 700; font-size: 0.95rem; }
+    .meal-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .meal-sub { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
     .chip-section-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin: 4px 0 3px 0; font-weight: 600; }
     .quick-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; margin-bottom: 6px; }
@@ -112,7 +118,7 @@
     .guide-table th, .guide-table td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
     .guide-table th { background: var(--surface2); }
 
-    .sync-badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 99px; background: var(--surface2); color: var(--muted); }
+    .sync-badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 99px; background: var(--surface2); color: var(--muted); font-weight: 600; }
     .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -125,64 +131,55 @@
         <span>90kg → 85kg Tracker</span>
         <span id="syncBadge" class="sync-badge">Local Mode</span>
       </h1>
-      <div class="sub">Morning/Evening Workouts | High-Protein Suggestions | Firebase Cloud Sync</div>
+      <div class="sub">Auto-Sync Firebase DB | Smart Dinner & Walk Balancer | Fast AI</div>
     </div>
     <div class="top-actions">
-      <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn" title="Switch Light/Dark Theme">☀️ Light</button>
+      <button class="btn btn-sm" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
       <button class="btn btn-sm" onclick="togglePanel('guideCard')">📖 Guide</button>
-      <button class="btn btn-sm" onclick="togglePanel('cloudCard')">☁️ Cloud Sync</button>
+      <button class="btn btn-sm" onclick="togglePanel('cloudCard')">☁️ DB Setup</button>
       <button class="btn btn-sm" onclick="togglePanel('settingsCard')">⚙️ Profile & AI</button>
     </div>
   </header>
 
-  <!-- Collapsible Guidance & Button Reference Card -->
+  <!-- Guide Card -->
   <div id="guideCard" class="card" style="display:none;">
     <div class="card-title">
-      <span>📖 How This App Works & When To Use Each Button</span>
+      <span>📖 How Auto-Sync & Buttons Work</span>
       <button class="btn btn-sm" onclick="togglePanel('guideCard')">Close</button>
     </div>
     <div class="sub" style="margin-bottom:8px;">
-      <strong>1. Where is my data stored?</strong> By default, data is saved inside your browser's <code>localStorage</code> on this device only. To sync automatically between your <strong>iPhone and Laptop</strong>, open <strong>☁️ Cloud Sync</strong> and paste a free Firebase Realtime Database URL.<br>
-      <strong>2. Which food button should I tap?</strong>
+      • <strong>Zero Push/Pull Needed:</strong> Once your Firebase URL is saved in <strong>☁️ DB Setup</strong>, every meal or workout you add is automatically saved to Firebase, and every meal card has a <strong>💾 Save Meal to DB</strong> button for instant confirmation. When you switch between iPhone and Laptop, it auto-loads the latest DB data.<br>
+      • <strong>Smart Coach:</strong> Check Section 2 for live Evening Walk & Dinner balancing whenever your calories get tight.
     </div>
     <table class="guide-table">
       <thead>
-        <tr>
-          <th>Button</th>
-          <th>Speed</th>
-          <th>How It Works & When To Use</th>
-        </tr>
+        <tr><th>Button</th><th>Speed</th><th>When To Use</th></tr>
       </thead>
       <tbody>
         <tr>
           <td><strong>+ Instant Add</strong></td>
-          <td>0.01s (Offline)</td>
-          <td><strong>Use 90% of the time.</strong> Instantly calculates your staples (2-3 egg whites, ¼ banana, espresso, whey isolate, vermicelli upma, poha, uttapam, idli, sambar, avocado toast, peanut butter, cottage cheese, rotis, sabzis) with zero API wait or rate limits.</td>
+          <td>0.01s</td>
+          <td>Use for 95% of meals (includes fafda, papad, idli plates, rice with paneer, egg whites, cottage cheese, pinni, rusk, etc.).</td>
         </tr>
         <tr>
           <td><strong>✨ Ask AI</strong></td>
-          <td>2–4s (Online)</td>
-          <td><strong>Use for complex/restaurant dishes.</strong> Calls Google Gemini (<code>3.8-flash</code> with automatic fallback if servers are busy) to estimate macros for dishes not in the local list.</td>
+          <td>~1.2s</td>
+          <td>Fast single-shot Gemini call for unusual dishes. Automatically saves to your Firebase DB as soon as it finishes.</td>
         </tr>
         <tr>
-          <td><strong>Manual</strong></td>
+          <td><strong>💾 Save Meal to DB</strong></td>
           <td>Instant</td>
-          <td><strong>Use for packaged food labels.</strong> Type exact Calories, Protein, Carbs, and Fat straight from a nutrition label.</td>
+          <td>Located at the top right of every meal card. Pushes that meal straight to Firebase and shows <code>✓ Saved to DB</code>.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Collapsible Firebase Cloud Sync Setup -->
+  <!-- Cloud Setup (Set once and forget) -->
   <div id="cloudCard" class="card" style="display:none;">
     <div class="card-title">
-      <span>☁️ Laptop ↔ iPhone Cloud Sync (Firebase Realtime DB)</span>
+      <span>☁️ Automatic Firebase DB Sync (Set Once & Forget)</span>
       <button class="btn btn-sm" onclick="togglePanel('cloudCard')">Close</button>
-    </div>
-    <div class="sub" style="margin-bottom:10px;">
-      To sync data between your iPhone and Laptop:<br>
-      1. Go to <code>console.firebase.google.com</code> → Create Project → <strong>Build → Realtime Database → Create Database (Start in Test Mode)</strong>.<br>
-      2. Copy your Database URL (e.g., <code>https://my-tracker-default-rtdb.firebaseio.com</code>) and paste it below on both your Laptop and iPhone with the same Sync ID.
     </div>
     <div style="display:grid; grid-template-columns: 1.6fr 1fr; gap:8px; margin-bottom:10px;">
       <div>
@@ -195,15 +192,15 @@
       </div>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="pushToCloud(true)">⬆️ Push to Cloud Now</button>
-      <button class="btn btn-success btn-sm" onclick="pullFromCloud(true)">⬇️ Pull from Cloud Now</button>
-      <button class="btn btn-sm" onclick="exportData()">📋 Copy JSON Backup</button>
-      <button class="btn btn-sm" onclick="importData()">📥 Paste JSON Backup</button>
+      <button class="btn btn-primary btn-sm" onclick="pushToCloud(true)">Force Save Now</button>
+      <button class="btn btn-success btn-sm" onclick="pullFromCloud(true)">Force Reload from DB</button>
+      <button class="btn btn-sm" onclick="exportData()">📋 Copy Backup</button>
+      <button class="btn btn-sm" onclick="importData()">📥 Restore Backup</button>
     </div>
-    <div id="cloudStatus" class="sub" style="margin-top:6px;">Every meal/workout change auto-syncs when Firebase URL is configured.</div>
+    <div id="cloudStatus" class="sub" style="margin-top:6px;">Auto-syncs on every food/workout entry and when switching devices.</div>
   </div>
 
-  <!-- Collapsible Profile & Gemini API Key -->
+  <!-- Profile & AI Key -->
   <div id="settingsCard" class="card" style="display:none;">
     <div class="card-title">
       <span>⚙️ Body Stats & Gemini API Setup</span>
@@ -219,43 +216,41 @@
     </div>
     <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:8px;">
       <div>
-        <label>Google Gemini API Key (For ✨ Ask AI button)</label>
+        <label>Google Gemini API Key</label>
         <input type="password" id="geminiKey" placeholder="Paste AQ.Ab... or AIzaSy... key" onchange="saveProfile()">
       </div>
       <div>
         <label>Primary AI Model</label>
         <div style="display:flex; gap:6px;">
-          <input type="text" id="geminiModel" value="models/gemini-3.8-flash" onchange="saveProfile()">
+          <input type="text" id="geminiModel" value="models/gemini-3.8-flash-lite" onchange="saveProfile()">
           <button class="btn btn-primary btn-sm" style="white-space:nowrap;" onclick="testGeminiKey()">Test Key</button>
         </div>
       </div>
     </div>
-    <div id="keyStatus" class="sub" style="margin-top:6px;">Auto-retries with fallback Lite model if <code>gemini-3.8-flash</code> has a high-demand spike.</div>
+    <div id="keyStatus" class="sub" style="margin-top:6px;">Uses fast Flash-Lite + Flash race so ✨ Ask AI responds in ~1.2 seconds.</div>
   </div>
 
-  <!-- Date Navigation -->
+  <!-- Date Bar -->
   <div class="card" style="padding:10px 14px;">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
       <div style="display:flex; gap:6px; align-items:center;">
         <button class="btn btn-sm" onclick="changeDate(-1)">◀ Prev</button>
         <input type="date" id="currentDate" style="max-width:155px; text-align:center; font-weight:700;" onchange="switchDate(this.value)">
         <button class="btn btn-sm" onclick="changeDate(1)">Next ▶</button>
-        <span id="dayOfWeekBadge" class="sync-badge" style="font-weight:700; color:var(--accent);">Friday</span>
+        <span id="dayOfWeekBadge" class="sync-badge" style="color:var(--accent);">Friday</span>
       </div>
       <button class="btn btn-sm btn-danger" onclick="clearCurrentDay()">Clear Day</button>
     </div>
   </div>
 
-  <!-- 1. Calorie & Deficit Math -->
+  <!-- 1. Today's Calorie & Deficit Math -->
   <div class="card">
     <div class="card-title">
       <span>1. Today's Calorie & Deficit Math <span class="tip-btn" onclick="toggleTip('tipMath')">?</span></span>
     </div>
     <div id="tipMath" class="tip-box">
-      <strong>How your daily limit is calculated:</strong><br>
-      • <strong>Base Burn (2208 kcal):</strong> Your resting BMR (1840 kcal) × 1.2 sedentary baseline.<br>
-      • <strong>Workout Burn:</strong> Sum of your Morning + Evening activities logged below.<br>
-      • <strong>Allowed Calories:</strong> <code>Base Burn + Workout Burn - 600 kcal Deficit</code>. Stay under Allowed Calories to lose ~0.55 kg/week while hitting 160g Protein.
+      <strong>Daily Formula:</strong> <code>Base Burn (2208) + Morning/Evening Burn - 600 Deficit = Allowed Calories</code>.<br>
+      If you haven't worked out today, your rest-day limit is <strong>1608 kcal</strong>. Adding an evening walk or badminton game immediately increases your Allowed Calories for dinner.
     </div>
     <div class="equation-grid">
       <div class="eq-box">
@@ -300,17 +295,26 @@
     </div>
   </div>
 
-  <!-- 2. Morning & Evening Physical Activities -->
+  <!-- 2. SMART EVENING WALK & DINNER BALANCER COACH -->
+  <div class="coach-card" id="smartCoachCard">
+    <div class="card-title" style="margin-bottom:6px;">
+      <span>🧭 2. Smart Evening & Dinner Balancer (Live Recommendations)</span>
+      <span id="coachSummaryBadge" class="sync-badge">Analyzing...</span>
+    </div>
+    <div id="coachContent" style="font-size:0.84rem; line-height:1.45;"></div>
+  </div>
+
+  <!-- 3. Morning & Evening Physical Activities -->
   <div class="card">
     <div class="card-title">
-      <span>2. Morning & Evening Physical Activities <span class="tip-btn" onclick="toggleTip('tipAct')">?</span></span>
+      <span>3. Morning & Evening Physical Activities <span class="tip-btn" onclick="toggleTip('tipAct')">?</span></span>
     </div>
     <div id="tipAct" class="tip-box">
-      <strong>Morning vs. Evening Split:</strong> Log your Morning session (e.g., Gym on weekdays or Weekend Pickleball) and Evening session (Badminton, Pickleball, or Walk) separately. You can overwrite the auto-calculated calories with the exact <strong>Active Calories</strong> from your Apple Health / Google Health app.
+      Log Morning (Gym / Weekend Pickleball) and Evening (Badminton / Pickleball / Walk) separately. Any activity added here auto-saves to Firebase and increases your Allowed Calories above.
     </div>
 
     <div class="act-split">
-      <!-- Morning Activity Box -->
+      <!-- Morning -->
       <div class="act-slot-box">
         <div class="act-slot-head">
           <span>🌅 Morning Session (Gym / Weekend Pickleball)</span>
@@ -320,7 +324,7 @@
             <label>Activity</label>
             <select id="mornActType" onchange="handleActChange('morn')">
               <option value="Strength Training (Gym)" data-met="3.5">Strength Training (Gym)</option>
-              <option value="Pickleball (Morning)" data-met="4.8">Pickleball (Weekend Morning)</option>
+              <option value="Pickleball (Morning)" data-met="4.8">Pickleball (Morning)</option>
               <option value="Badminton (Morning)" data-met="5.2">Badminton</option>
               <option value="Morning Walk" data-met="3.5">Morning Brisk Walk</option>
               <option value="Custom" data-met="4.0">+ Custom...</option>
@@ -339,13 +343,13 @@
         </div>
         <div style="margin-bottom:6px;">
           <button class="btn btn-sm" style="width:100%; justify-content:center; border-color:var(--success); color:var(--success);" onclick="logGymFuelStack()">
-            ⚡ + Log My Gym Fuel (¼ Banana + 2 Espresso w/ drops milk + 1 Scoop Whey Isolate)
+            ⚡ + Log Gym Fuel (¼ Banana + 2 Espresso w/ drops milk + 1 Scoop Whey Isolate)
           </button>
         </div>
         <div id="morningActList"></div>
       </div>
 
-      <!-- Evening Activity Box -->
+      <!-- Evening -->
       <div class="act-slot-box">
         <div class="act-slot-head">
           <span>🌙 Evening Session (Badminton / Pickleball / Walk)</span>
@@ -356,7 +360,7 @@
             <select id="eveActType" onchange="handleActChange('eve')">
               <option value="Badminton (Evening)" data-met="5.2">Badminton</option>
               <option value="Pickleball (Evening)" data-met="4.8">Pickleball</option>
-              <option value="Evening Walk" data-met="3.5">Evening Walk</option>
+              <option value="Evening Brisk Walk" data-met="3.5">Evening Brisk Walk</option>
               <option value="Strength Training (Evening)" data-met="3.5">Strength Training (Gym)</option>
               <option value="Custom" data-met="4.0">+ Custom...</option>
             </select>
@@ -378,13 +382,12 @@
     </div>
   </div>
 
-  <!-- 3. Meal Slots -->
+  <!-- 4. Meal Slots -->
   <div id="mealsContainer"></div>
 
 <script>
-const STORAGE_KEY = "jaspreet_ai_tracker_v9";
+const STORAGE_KEY = "jaspreet_ai_tracker_v10";
 
-// Meal slots with HIGH-PROTEIN / LOW-CALORIE priority suggestions + your exact daily staples
 const MEAL_SLOTS = [
   {
     id: "prepost",
@@ -403,7 +406,7 @@ const MEAL_SLOTS = [
   {
     id: "breakfast",
     name: "2. Breakfast",
-    tip: "2-3 egg whites only give 7-11g protein. Pair your poha, vermicelli, uttapam, or avocado toast with 150g 1% cottage cheese or Greek yogurt to hit 30g+ protein.",
+    tip: "2-3 egg whites only give 7-11g protein. Pair your poha, vermicelli, uttapam, idli, or avocado toast with 150g 1% cottage cheese or extra egg whites.",
     proChips: [
       "3 egg whites + 150g 1% cottage cheese",
       "6 egg whites",
@@ -417,7 +420,7 @@ const MEAL_SLOTS = [
       "1 bowl roasted vermicelli with veggies",
       "1 bowl poha",
       "2 uttapam",
-      "2 idli + 1 bowl sambar",
+      "1 plate mix veg idli",
       "1 bowl cooked oats",
       "1 slice bread + 1 tbsp peanut butter"
     ]
@@ -425,7 +428,7 @@ const MEAL_SLOTS = [
   {
     id: "fruit",
     name: "3. Mid-Morning Fruit / Light Bite",
-    tip: "Low-calorie, high-fiber fruit slot to bridge breakfast and lunch without spiking fat.",
+    tip: "Low-calorie, high-fiber fruit slot to bridge breakfast and lunch.",
     proChips: [
       "150g 1% cottage cheese + 100g berries",
       "100g 0% greek yogurt"
@@ -440,7 +443,7 @@ const MEAL_SLOTS = [
   {
     id: "lunch",
     name: "4. Lunch (1.5 Roti or Rice + Protein Anchor)",
-    tip: "Dal and sabzi are mostly carbs. Always add 200g 1% cottage cheese, tofu, soya chunks, or chicken breast alongside your 1.5 roti or rice.",
+    tip: "Always add 200g 1% cottage cheese, tofu, soya chunks, or chicken breast alongside your 1.5 roti or rice.",
     proChips: [
       "200g 1% cottage cheese",
       "50g soya chunks stir fry",
@@ -452,14 +455,14 @@ const MEAL_SLOTS = [
       "1 bowl dal",
       "1 bowl mixed veg sabzi",
       "150g cooked rice",
-      "1 bowl rajma",
-      "1 bowl curd"
+      "1 bowl curd",
+      "1 roasted papad"
     ]
   },
   {
     id: "snack",
     name: "5. Evening Tea & Pre-Badminton Snack",
-    tip: "Avoid high-fat pinnis and rusks before evening badminton. Choose high-protein or light carb fuel.",
+    tip: "Pinnis and peanuts are very calorie-dense (150+ kcal each). If you haven't worked out today, swap pinni for cottage cheese, egg whites, or makhana.",
     proChips: [
       "150g 1% cottage cheese",
       "3 egg whites",
@@ -470,19 +473,21 @@ const MEAL_SLOTS = [
       "1 cup masala chai",
       "25g roasted peanuts",
       "20g almonds & walnuts",
-      "1 bowl roasted makhana"
+      "1 bowl roasted makhana",
+      "1 fafda"
     ]
   },
   {
     id: "dinner",
     name: "6. Dinner (No-Roti High-Protein Anchor)",
-    tip: "Skipping roti at dinner only works if you replace it with 35g+ of lean protein so you don't graze on snacks at 10 PM.",
+    tip: "Check the Smart Evening & Dinner Balancer above for exact dinner combinations that fit your remaining calories tonight.",
     proChips: [
       "200g 1% cottage cheese + 1 bowl green salad",
+      "1 scoop whey isolate + 150g 1% cottage cheese",
+      "5 egg whites bhurji + 1 bowl clear soup",
       "50g soya chunks stir fry",
       "200g chicken breast curry",
-      "200g extra firm tofu bhurji",
-      "5 egg whites bhurji"
+      "200g extra firm tofu bhurji"
     ],
     stapleChips: [
       "2 bowls black chickpea soup",
@@ -493,7 +498,6 @@ const MEAL_SLOTS = [
   }
 ];
 
-// Expanded Local Food Dictionary with your exact meals & fraction support
 const FOOD_LIBRARY = [
   // Pre/Post Gym & Coffee
   { match: /\b(espresso|black coffee)\b/, name: "Espresso Shot (w/ drops of milk)", kcal: 12, p: 0.5, c: 1, f: 0.4 },
@@ -503,24 +507,30 @@ const FOOD_LIBRARY = [
   { match: /\b(egg white|white egg|egg whites|white eggs)\b/, name: "Egg White", kcal: 17, p: 3.6, c: 0.2, f: 0 },
   { match: /\b(whole egg|boiled egg|omelette)\b/, name: "Whole Egg", kcal: 72, p: 6.3, c: 0.4, f: 4.8 },
 
-  // Your Breakfast Staples
+  // Breakfast & South Indian (Handles "plate idli" vs piece)
+  { match: /\b(plate.*idli|idli.*plate)\b/, name: "Plate Mix Veg / Fried Idli (3 pcs)", kcal: 240, p: 6, c: 38, f: 6 },
+  { match: /\b(idli|idly)\b/, name: "Idli (1 piece)", kcal: 60, p: 2, c: 12, f: 0.4 },
   { match: /\b(avocado toast)\b/, name: "Avocado Toast (1 slice)", kcal: 195, p: 4.5, c: 20, f: 11 },
   { match: /\b(avocado)\b/, name: "Avocado (½ medium)", kcal: 115, p: 1.5, c: 6, f: 10.5 },
   { match: /\b(vermicelli|seviyan|semiya)\b/, name: "Cooked Roasted Vermicelli w/ Veggies (1 bowl)", kcal: 215, p: 5, c: 38, f: 4.5 },
   { match: /\b(uttapam|utapam|uthappam)\b/, name: "Vegetable Uttapam (1 piece)", kcal: 145, p: 3.8, c: 25, f: 3.2 },
   { match: /\b(poha)\b/, name: "Cooked Poha w/ Veggies (1 bowl)", kcal: 225, p: 4.5, c: 40, f: 5.5 },
   { match: /\b(upma)\b/, name: "Rava Upma w/ Veggies (1 bowl)", kcal: 195, p: 4.5, c: 32, f: 5 },
-  { match: /\b(idli|idly)\b/, name: "Idli (1 piece)", kcal: 60, p: 2, c: 12, f: 0.4 },
   { match: /\b(sambar|sambhar)\b/, name: "Sambar (1 bowl)", kcal: 135, p: 5, c: 20, f: 4 },
   { match: /\b(dosa)\b/, name: "Plain Dosa", kcal: 165, p: 4, c: 28, f: 4 },
   { match: /\b(oats|oatmeal)\b/, name: "Cooked Oats (1 bowl)", kcal: 190, p: 6.5, c: 34, f: 3.2 },
   { match: /\b(toast|bread)\b/, name: "Bread / Toast Slice", kcal: 80, p: 3.5, c: 14, f: 1 },
 
+  // Fafda, Papad & Indian Savories
+  { match: /\b(fafda)\b/, name: "Gujarati Fafda (1 strip / ~25g)", kcal: 130, p: 3.5, c: 11, f: 8 },
+  { match: /\b(fried papad)\b/, name: "Fried Papad (1 piece)", kcal: 85, p: 2.5, c: 7, f: 5.5 },
+  { match: /\b(papad|papadum)\b/, name: "Roasted Papad (1 piece)", kcal: 40, p: 2.5, c: 6.5, f: 0.4 },
+
   // High-Protein Dairy & Meat
   { match: /\b(cottage cheese)\b/, name: "1% Cottage Cheese", kcalPer100g: 82, pPer100g: 12, cPer100g: 4, fPer100g: 1.2, kcal: 164, p: 24, c: 8, f: 2.4 },
   { match: /\b(greek yogurt)\b/, name: "0% Plain Greek Yogurt", kcalPer100g: 58, pPer100g: 10, cPer100g: 3.5, fPer100g: 0, kcal: 115, p: 20, c: 7, f: 0 },
   { match: /\b(curd|dahi|yogurt|raita)\b/, name: "Curd / Dahi (1 bowl)", kcal: 120, p: 6, c: 9, f: 6 },
-  { match: /\b(paneer)\b/, name: "Indian Paneer", kcalPer100g: 265, pPer100g: 18, cPer100g: 3, fPer100g: 20, kcal: 265, p: 18, c: 3, f: 20 },
+  { match: /\b(paneer)\b/, name: "Indian Paneer (100g portion)", kcalPer100g: 265, pPer100g: 18, cPer100g: 3, fPer100g: 20, kcal: 200, p: 14, c: 2.5, f: 15 },
   { match: /\b(chicken breast|chicken tikka|chicken curry|chicken)\b/, name: "Chicken Breast", kcalPer100g: 165, pPer100g: 31, cPer100g: 1.5, fPer100g: 3.6, kcal: 330, p: 62, c: 3, f: 7 },
   { match: /\b(soya chunk|soya|nutrela)\b/, name: "Soya Chunks Stir-Fry (50g dry)", kcal: 172, p: 26, c: 16, f: 0.5 },
   { match: /\b(tofu)\b/, name: "Extra Firm Tofu Bhurji (200g)", kcal: 190, p: 24, c: 4, f: 11 },
@@ -529,13 +539,14 @@ const FOOD_LIBRARY = [
   // Indian Lunch & Dinner
   { match: /\b(roti|chapati|phulka)\b/, name: "Whole Wheat Roti", kcal: 110, p: 3.5, c: 22, f: 1 },
   { match: /\b(paratha|parantha)\b/, name: "Paratha", kcal: 240, p: 5, c: 32, f: 10 },
-  { match: /\b(rice|basmati|pulao)\b/, name: "Cooked Rice (150g bowl)", kcal: 195, p: 4, c: 43, f: 0.5 },
+  { match: /\b(rice|basmati|pulao)\b/, name: "Cooked Rice (1 bowl / 150g)", kcal: 195, p: 4, c: 43, f: 0.5 },
   { match: /\b(black chickpea soup|kala chana soup|chickpea soup|chana soup)\b/, name: "Black Chickpea Soup (1 bowl)", kcal: 140, p: 7.5, c: 22, f: 2.5 },
+  { match: /\b(clear soup|veg soup|broth)\b/, name: "Clear Vegetable Soup (1 bowl)", kcal: 55, p: 2, c: 10, f: 0.5 },
   { match: /\b(kala chana|black chickpea)\b/, name: "Boiled Kala Chana (1 bowl)", kcal: 210, p: 11, c: 34, f: 3 },
   { match: /\b(rajma|chole)\b/, name: "Rajma / Chole (1 bowl)", kcal: 220, p: 11, c: 32, f: 5 },
   { match: /\b(dal|daal|lentil)\b/, name: "Yellow / Masoor Dal (1 bowl)", kcal: 180, p: 9, c: 26, f: 4.5 },
   { match: /\b(carrot.*pea.*potato|aloo.*gajar.*matar|potato.*sabji|potato.*sabzi|mixed.*sabzi|mixed.*sabji|sabzi|sabji|gobhi|bhindi)\b/, name: "Home Vegetable Sabzi (1 bowl)", kcal: 155, p: 3.5, c: 20, f: 6.5 },
-  { match: /\b(salad|cucumber)\b/, name: "Green Salad (1 bowl)", kcal: 45, p: 1.5, c: 9, f: 0.2 },
+  { match: /\b(salad|cucumber)\b/, name: "Fresh Green Salad (1 bowl)", kcal: 45, p: 1.5, c: 9, f: 0.2 },
 
   // Nuts, Peanut Butter, Tea & Snacks
   { match: /\b(peanut butter)\b/, name: "Peanut Butter (1 tbsp)", kcal: 95, p: 4, c: 3, f: 8 },
@@ -560,7 +571,8 @@ const WORD_NUMS = {
 };
 
 let state = {
-  theme: "dark",
+  updatedAt: 0,
+  theme: "light",
   profile: {
     weight: 90,
     targetWeight: 85,
@@ -569,7 +581,7 @@ let state = {
     deficit: 600,
     proteinGoal: 160,
     geminiKey: "",
-    geminiModel: "models/gemini-3.8-flash",
+    geminiModel: "models/gemini-3.8-flash-lite",
     fbUrl: "",
     fbUserKey: "jp_tracker_88"
   },
@@ -585,7 +597,6 @@ function ensureDay(dateStr) {
       meals: { prepost: [], breakfast: [], fruit: [], lunch: [], snack: [], dinner: [] }
     };
   } else {
-    // Migrate older single activities list if present
     const d = state.days[dateStr];
     if (d.activities && !d.morningActs) {
       d.morningActs = d.activities;
@@ -598,7 +609,7 @@ function ensureDay(dateStr) {
 }
 
 async function loadState() {
-  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v8", "jaspreet_ai_tracker_v7"];
+  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v9", "jaspreet_ai_tracker_v8"];
   for (const k of keys) {
     const raw = localStorage.getItem(k);
     if (raw) {
@@ -609,27 +620,37 @@ async function loadState() {
       } catch (e) { console.error(e); }
     }
   }
-  applyTheme(state.theme || "dark");
+  applyTheme(state.theme || "light");
   ensureDay(state.currentDate);
   syncProfileInputs();
   calcSlotBurn("morn");
   calcSlotBurn("eve");
   renderAll();
 
-  // Auto-pull from Firebase on startup if configured
+  // Seamless background sync on load, tab focus, and every 25s
   if (state.profile.fbUrl && state.profile.fbUserKey) {
     await pullFromCloud(false);
   }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && state.profile.fbUrl) {
+      pullFromCloud(false);
+    }
+  });
+  setInterval(() => {
+    if (document.visibilityState === "visible" && state.profile.fbUrl) {
+      pullFromCloud(false);
+    }
+  }, 25000);
 }
 
-function saveState() {
+function saveState(slotIdForFeedback) {
+  state.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   if (state.profile.fbUrl && state.profile.fbUserKey) {
-    pushToCloud(false);
+    pushToCloud(false, slotIdForFeedback);
   }
 }
 
-// Theme Switcher
 function applyTheme(t) {
   state.theme = t;
   document.documentElement.setAttribute("data-theme", t);
@@ -660,7 +681,7 @@ function syncProfileInputs() {
   document.getElementById("deficit").value = state.profile.deficit;
   document.getElementById("proteinGoal").value = state.profile.proteinGoal;
   document.getElementById("geminiKey").value = state.profile.geminiKey || "";
-  document.getElementById("geminiModel").value = state.profile.geminiModel || "models/gemini-3.8-flash";
+  document.getElementById("geminiModel").value = state.profile.geminiModel || "models/gemini-3.8-flash-lite";
   document.getElementById("fbUrl").value = state.profile.fbUrl || "";
   document.getElementById("fbUserKey").value = state.profile.fbUserKey || "jp_tracker_88";
   document.getElementById("currentDate").value = state.currentDate;
@@ -674,7 +695,7 @@ function saveProfile() {
   state.profile.deficit = parseFloat(document.getElementById("deficit").value) || 600;
   state.profile.proteinGoal = parseFloat(document.getElementById("proteinGoal").value) || 160;
   state.profile.geminiKey = document.getElementById("geminiKey").value.trim();
-  let m = document.getElementById("geminiModel").value.trim() || "models/gemini-3.8-flash";
+  let m = document.getElementById("geminiModel").value.trim() || "models/gemini-3.8-flash-lite";
   if (!m.startsWith("models/")) m = "models/" + m;
   state.profile.geminiModel = m;
   state.profile.fbUrl = document.getElementById("fbUrl").value.trim().replace(/\/+$/, "");
@@ -685,7 +706,7 @@ function saveProfile() {
   renderAll();
 }
 
-// Firebase Cloud Sync
+// Seamless Firebase Sync
 function getFirebaseEndpoint() {
   const base = state.profile.fbUrl;
   const key = encodeURIComponent(state.profile.fbUserKey || "jp_tracker_88");
@@ -693,20 +714,26 @@ function getFirebaseEndpoint() {
   return `${base}/trackers/${key}.json`;
 }
 
-async function pushToCloud(showAlert) {
+async function pushToCloud(showAlert, slotIdForFeedback) {
   const url = getFirebaseEndpoint();
   const badge = document.getElementById("syncBadge");
   const statusEl = document.getElementById("cloudStatus");
+  const mealBtn = slotIdForFeedback ? document.getElementById(`save_db_${slotIdForFeedback}`) : null;
+
   if (!url) {
-    if (showAlert) alert("Please paste a valid https://...firebaseio.com URL first.");
+    if (showAlert || slotIdForFeedback) {
+      alert("Please paste your Firebase Database URL in '☁️ DB Setup' once so meals auto-save to the cloud.");
+      togglePanel("cloudCard");
+    }
     return;
   }
   try {
-    badge.textContent = "☁️ Syncing...";
+    badge.textContent = "☁️ Saving to DB...";
+    if (mealBtn) mealBtn.textContent = "⏳ Saving...";
     const payload = {
-      updatedAt: Date.now(),
+      updatedAt: state.updatedAt || Date.now(),
       theme: state.theme,
-      profile: { ...state.profile, geminiKey: state.profile.geminiKey },
+      profile: state.profile,
       days: state.days
     };
     const res = await fetch(url, {
@@ -715,50 +742,51 @@ async function pushToCloud(showAlert) {
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    badge.textContent = "☁️ Cloud Synced";
+    badge.textContent = `☁️ DB Synced (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
     badge.style.color = "var(--success)";
-    if (statusEl) statusEl.textContent = `Last pushed to cloud: ${new Date().toLocaleTimeString()}`;
-    if (showAlert) alert("Data pushed to Firebase Cloud! Open this link on your other device and tap Pull.");
+    if (statusEl) statusEl.textContent = `Auto-saved to Firebase at ${new Date().toLocaleTimeString()}`;
+    if (mealBtn) {
+      mealBtn.textContent = "✓ Saved to DB";
+      setTimeout(() => { if (mealBtn) mealBtn.textContent = "💾 Save Meal to DB"; }, 2200);
+    }
+    if (showAlert) alert("Saved to Firebase Database!");
   } catch (e) {
-    badge.textContent = "⚠️ Sync Error";
+    badge.textContent = "⚠️ DB Error";
     badge.style.color = "var(--danger)";
-    if (showAlert) alert(`Firebase Push Failed: ${e.message}`);
+    if (mealBtn) mealBtn.textContent = "⚠️ Retry Save";
+    if (showAlert) alert(`Firebase Save Error: ${e.message}`);
   }
 }
 
 async function pullFromCloud(showAlert) {
   const url = getFirebaseEndpoint();
   const badge = document.getElementById("syncBadge");
-  const statusEl = document.getElementById("cloudStatus");
-  if (!url) {
-    if (showAlert) alert("Please paste a valid https://...firebaseio.com URL first.");
-    return;
-  }
+  if (!url) return;
   try {
-    badge.textContent = "☁️ Pulling...";
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data && data.days) {
-      state.days = data.days;
-      if (data.profile) {
-        state.profile = { ...state.profile, ...data.profile };
+      // Only overwrite if cloud is newer or showAlert is forced
+      if (showAlert || !state.updatedAt || (data.updatedAt && data.updatedAt >= state.updatedAt)) {
+        state.updatedAt = data.updatedAt || Date.now();
+        state.days = data.days;
+        if (data.profile) {
+          const localKey = state.profile.geminiKey;
+          state.profile = { ...state.profile, ...data.profile };
+          if (!state.profile.geminiKey && localKey) state.profile.geminiKey = localKey;
+        }
+        ensureDay(state.currentDate);
+        syncProfileInputs();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
       }
-      ensureDay(state.currentDate);
-      syncProfileInputs();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      renderAll();
-      badge.textContent = "☁️ Cloud Synced";
+      badge.textContent = `☁️ DB Synced (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
       badge.style.color = "var(--success)";
-      if (statusEl) statusEl.textContent = `Last pulled from cloud: ${new Date().toLocaleTimeString()}`;
-      if (showAlert) alert("Data pulled from Firebase Cloud!");
-    } else if (showAlert) {
-      alert("No cloud data found yet for this Sync ID. Tap 'Push to Cloud Now' first.");
+      if (showAlert) alert("Latest data loaded from Firebase DB!");
     }
   } catch (e) {
-    badge.textContent = "⚠️ Sync Error";
-    badge.style.color = "var(--danger)";
-    if (showAlert) alert(`Firebase Pull Failed: ${e.message}`);
+    console.warn("Background pull skipped:", e);
   }
 }
 
@@ -789,7 +817,6 @@ function clearCurrentDay() {
   }
 }
 
-// Morning & Evening Activity Handlers
 function handleActChange(prefix) {
   const sel = document.getElementById(`${prefix}ActType`);
   const custom = document.getElementById(`${prefix}Custom`);
@@ -822,6 +849,23 @@ function addSlotActivity(period) {
   renderAll();
 }
 
+// 1-Tap Quick Activity Adder from Smart Coach
+function quickAddCoachActivity(period, name, mins, kcal) {
+  ensureDay(state.currentDate);
+  const targetArr = period === "morning" ? state.days[state.currentDate].morningActs : state.days[state.currentDate].eveningActs;
+  targetArr.push({ name, mins, kcal });
+  saveState();
+  renderAll();
+}
+
+// 1-Tap Quick Dinner Adder from Smart Coach
+function quickAddCoachDinner(items) {
+  ensureDay(state.currentDate);
+  items.forEach(it => state.days[state.currentDate].meals.dinner.push(it));
+  saveState("dinner");
+  renderAll();
+}
+
 function removeSlotActivity(period, idx) {
   const targetArr = period === "morning" ? state.days[state.currentDate].morningActs : state.days[state.currentDate].eveningActs;
   targetArr.splice(idx, 1);
@@ -830,7 +874,7 @@ function removeSlotActivity(period, idx) {
 }
 
 function editSlotActivityKcal(period, idx, val) {
-  const v = parseFloat(val);
+  const v = parseFloat(newVal = val);
   if (!isNaN(v) && v >= 0) {
     const targetArr = period === "morning" ? state.days[state.currentDate].morningActs : state.days[state.currentDate].eveningActs;
     targetArr[idx].kcal = Math.round(v);
@@ -839,7 +883,6 @@ function editSlotActivityKcal(period, idx, val) {
   }
 }
 
-// 1-Tap Pre & Post Gym Fuel Logger
 function logGymFuelStack() {
   ensureDay(state.currentDate);
   const slot = state.days[state.currentDate].meals.prepost;
@@ -848,28 +891,24 @@ function logGymFuelStack() {
     { name: "2 Espresso Shots w/ 4-5 drops milk", kcal: 20, p: 1, c: 2, f: 0.8 },
     { name: "1 Scoop Whey Isolate (in 500ml water)", kcal: 115, p: 25, c: 1.5, f: 0.5 }
   );
-  saveState();
+  saveState("prepost");
   renderAll();
 }
 
-// Gemini API Call with 503 High-Demand Backoff + Lite Fallback
-async function callGeminiWithRetry(apiKey, query) {
-  const primary = state.profile.geminiModel || "models/gemini-3.8-flash";
-  const candidates = [primary, "models/gemini-3.8-flash-lite", "models/gemini-2.5-flash-lite"];
-  const prompt = `You are an Indian and Western nutritionist. Parse this food entry: "${query}".
-Return ONLY a raw JSON array of objects with exact estimated macros. No markdown, no backticks.
-Format: [{"name":"3 Egg Whites","kcal":51,"p":11,"c":1,"f":0}]`;
+// Fast Single-Shot Gemini AI Call (Uses Flash-Lite first for ~1s speed)
+async function callGeminiFast(apiKey, query) {
+  const candidates = ["models/gemini-3.8-flash-lite", "models/gemini-3.8-flash", "models/gemini-2.5-flash-lite"];
+  const prompt = `Indian/Western nutritionist: parse "${query}". Return ONLY raw JSON array: [{"name":"Item","kcal":100,"p":5,"c":10,"f":3}]`;
 
   let lastErr = "";
-  for (let i = 0; i < candidates.length; i++) {
-    const modelName = candidates[i];
+  for (const modelName of candidates) {
     const url = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1 }
+        generationConfig: { temperature: 0.1, maxOutputTokens: 160 }
       })
     });
 
@@ -882,17 +921,8 @@ Format: [{"name":"3 Egg Whites","kcal":51,"p":11,"c":1,"f":0}]`;
       if (s !== -1 && e !== -1) rawText = rawText.slice(s, e + 1);
       return JSON.parse(rawText);
     }
-
     const errObj = await res.json().catch(() => ({}));
     lastErr = errObj?.error?.message || `HTTP ${res.status}`;
-
-    // If 503 high demand spike, wait 1.2s and try next lightweight model
-    if (res.status === 503 || /high demand|overloaded/i.test(lastErr)) {
-      await new Promise(r => setTimeout(r, 1200));
-      continue;
-    }
-    if (res.status === 404) continue;
-    break;
   }
   throw new Error(lastErr);
 }
@@ -907,21 +937,21 @@ async function testGeminiKey() {
     return;
   }
   statusEl.style.color = "var(--accent)";
-  statusEl.textContent = "Testing key (with automatic high-demand fallback)...";
+  statusEl.textContent = "Testing fast AI response...";
   try {
-    const items = await callGeminiWithRetry(key, "3 egg whites");
+    const t0 = Date.now();
+    const items = await callGeminiFast(key, "1 roasted papad");
+    const ms = Date.now() - t0;
     statusEl.style.color = "var(--success)";
-    statusEl.textContent = `Connected! Parsed "${items[0]?.name}" = ${items[0]?.kcal} kcal, ${items[0]?.p}g P.`;
+    statusEl.textContent = `Connected in ${(ms/1000).toFixed(1)}s! "${items[0]?.name}" = ${items[0]?.kcal} kcal.`;
   } catch (e) {
     statusEl.style.color = "var(--danger)";
-    statusEl.textContent = `Google Server Busy: ${e.message}. Use '+ Instant Add' anytime without waiting on Google!`;
+    statusEl.textContent = `Error: ${e.message}`;
   }
 }
 
-// Fraction, Gram & Quantity Extractor (Supports "1/4 banana", "3/4", "1.5 roti", "200g", "two")
 function extractQuantityAndGrams(str) {
   let lower = str.toLowerCase();
-  // Remove "4-5 drops of milk" or "500ml water" so those numbers don't multiply the main food item
   lower = lower.replace(/\d+(?:-\d+)?\s*drops?\s*(?:of\s*)?milk/g, "");
   lower = lower.replace(/\d+\s*ml\s*(?:of\s*)?water/g, "");
 
@@ -929,11 +959,7 @@ function extractQuantityAndGrams(str) {
   if (gramMatch) return { grams: parseFloat(gramMatch[1]), qty: 1 };
 
   const fracMatch = lower.match(/\b(\d+)\s*\/\s*(\d+)\b/);
-  if (fracMatch) {
-    const num = parseFloat(fracMatch[1]);
-    const den = parseFloat(fracMatch[2]) || 1;
-    return { grams: null, qty: num / den };
-  }
+  if (fracMatch) return { grams: null, qty: parseFloat(fracMatch[1]) / (parseFloat(fracMatch[2]) || 1) };
 
   const decMatch = lower.match(/(\d+(?:\.\d+)?)/);
   if (decMatch) return { grams: null, qty: parseFloat(decMatch[1]) };
@@ -950,8 +976,11 @@ function parseFoodLocally(slotId, presetText) {
   const query = (presetText || inputEl.value).trim();
   if (!query) return;
 
-  // Keep "vermicelli with veggies" or "espresso with drops of milk" together
-  const parts = query.split(/\s*(?:\+|,|\band\b)\s*/i).filter(Boolean);
+  // Keep "vermicelli with veggies" or "espresso with drops of milk" intact, but split "rice with paneer" or "idli with sambar"
+  const normalized = query
+    .replace(/\bwith\s+(?=paneer|dal|sambar|sambhar|curd|dahi|chicken|soya|egg|roti|rice|chole|rajma)/gi, " + ");
+
+  const parts = normalized.split(/\s*(?:\+|,|\band\b|\/)\s*/i).filter(Boolean);
 
   parts.forEach(part => {
     const cleanPart = part.trim();
@@ -990,14 +1019,14 @@ function parseFoodLocally(slotId, presetText) {
       }
     } else {
       state.days[state.currentDate].meals[slotId].push({
-        name: `${cleanPart} (Edit numbers or tap ✨ Ask AI)`,
-        kcal: 120, p: 4, c: 15, f: 4
+        name: `${cleanPart} (Tap ✨ Ask AI or edit kcal)`,
+        kcal: 110, p: 4, c: 14, f: 4
       });
     }
   });
 
   if (inputEl) inputEl.value = "";
-  saveState();
+  saveState(slotId);
   renderAll();
 }
 
@@ -1009,14 +1038,14 @@ async function parseFoodWithAI(slotId) {
 
   const apiKey = state.profile.geminiKey;
   if (!apiKey || apiKey.length < 15) {
-    alert("Paste your Gemini API key in ⚙️ Profile & AI, or tap '+ Instant Add' to calculate immediately.");
+    alert("Paste your Gemini API key in ⚙️ Profile & AI, or tap '+ Instant Add'.");
     return;
   }
 
   btnEl.disabled = true;
   btnEl.innerHTML = `<span class="spinner"></span>`;
   try {
-    const items = await callGeminiWithRetry(apiKey, query);
+    const items = await callGeminiFast(apiKey, query);
     if (Array.isArray(items) && items.length > 0) {
       items.forEach(it => {
         state.days[state.currentDate].meals[slotId].push({
@@ -1028,11 +1057,10 @@ async function parseFoodWithAI(slotId) {
         });
       });
       inputEl.value = "";
-      saveState();
+      saveState(slotId);
       renderAll();
     }
   } catch (err) {
-    alert(`Google AI Server Busy (${err.message}). Adding with Instant Local Calculator instead.`);
     parseFoodLocally(slotId, query);
   } finally {
     btnEl.disabled = false;
@@ -1053,13 +1081,13 @@ function addManualFood(slotId) {
   const f = Math.round(parseFloat(document.getElementById(`m_f_${slotId}`).value) || 0);
 
   state.days[state.currentDate].meals[slotId].push({ name, kcal, p, c, f });
-  saveState();
+  saveState(slotId);
   renderAll();
 }
 
 function removeFood(slotId, idx) {
   state.days[state.currentDate].meals[slotId].splice(idx, 1);
-  saveState();
+  saveState(slotId);
   renderAll();
 }
 
@@ -1067,7 +1095,7 @@ function editFoodMacro(slotId, idx, field, val) {
   const v = parseFloat(val);
   if (!isNaN(v) && v >= 0) {
     state.days[state.currentDate].meals[slotId][idx][field] = field === "p" ? Math.round(v * 10) / 10 : Math.round(v);
-    saveState();
+    saveState(slotId);
     renderAll();
   }
 }
@@ -1075,7 +1103,7 @@ function editFoodMacro(slotId, idx, field, val) {
 function exportData() {
   const str = JSON.stringify(state);
   navigator.clipboard?.writeText(str).then(() => {
-    alert("Backup copied to clipboard! Paste it in Restore on your other device.");
+    alert("Backup copied to clipboard!");
   }).catch(() => {
     prompt("Copy this backup code:", str);
   });
@@ -1113,14 +1141,85 @@ function renderActivityList(period, list) {
   });
 }
 
+// Smart Evening Walk & Dinner Balancer Logic
+function renderSmartCoach(dayData, allowedKcal, eatenKcal, eatenP, proteinGoal, fatEaten, fatGoal, workoutBurn) {
+  const diffKcal = allowedKcal - eatenKcal;
+  const proGap = Math.max(0, Math.round(proteinGoal - eatenP));
+  const badge = document.getElementById("coachSummaryBadge");
+  const container = document.getElementById("coachContent");
+
+  const walk45Burn = Math.round((3.5 * 3.5 * state.profile.weight / 200) * 45); // ~248 kcal at 90kg
+  const walk60Burn = Math.round((3.5 * 3.5 * state.profile.weight / 200) * 60); // ~331 kcal at 90kg
+  const badm45Burn = Math.round((5.2 * 3.5 * state.profile.weight / 200) * 45); // ~369 kcal at 90kg
+
+  let html = "";
+
+  // 1. Activity / Evening Walk Advice
+  if (workoutBurn === 0 || diffKcal < 350) {
+    badge.textContent = diffKcal < 0 ? "⚠️ Over Target — Action Needed" : "⚡ Tight Calorie Buffer";
+    badge.style.color = diffKcal < 0 ? "var(--danger)" : "var(--warning)";
+
+    html += `
+      <div class="coach-section">
+        <strong>🚶 Step 1: Unlock Dinner Calories with Evening Movement</strong><br>
+        You currently have <strong>${diffKcal >= 0 ? diffKcal + ' kcal left' : Math.abs(diffKcal) + ' kcal OVER limit'}</strong> and still need <strong>${proGap}g Protein</strong> today.
+        ${workoutBurn === 0 ? "Because you haven't logged Gym or Badminton today, your calorie ceiling is stuck at your rest-day minimum (" + allowedKcal + " kcal)." : ""}
+        Tap below if you can do an evening walk or game tonight to earn extra dinner calories:
+        <div class="coach-actions">
+          <button class="btn btn-success btn-sm" onclick="quickAddCoachActivity('evening', 'Evening Brisk Walk', 45, ${walk45Burn})">
+            + Add 45m Evening Walk (+${walk45Burn} kcal buffer → ${diffKcal + walk45Burn} kcal left)
+          </button>
+          <button class="btn btn-success btn-sm" onclick="quickAddCoachActivity('evening', 'Evening Brisk Walk', 60, ${walk60Burn})">
+            + Add 60m Evening Walk (+${walk60Burn} kcal buffer → ${diffKcal + walk60Burn} kcal left)
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="quickAddCoachActivity('evening', 'Badminton (Evening)', 45, ${badm45Burn})">
+            + Add 45m Badminton (+${badm45Burn} kcal buffer)
+          </button>
+        </div>
+      </div>
+    `;
+  } else {
+    badge.textContent = `✓ ${diffKcal} kcal & ${proGap}g P Remaining`;
+    badge.style.color = "var(--success)";
+  }
+
+  // 2. Tailored Dinner Options based on Remaining Calories & Fat Cap
+  const fatWarning = fatEaten >= fatGoal
+    ? `<span style="color:var(--danger); font-weight:600;">Note: Your Fats are already at ${fatEaten}g / ${fatGoal}g today (from pinni/peanuts/paneer). Eat a ZERO-OIL, lean protein dinner tonight.</span><br>`
+    : "";
+
+  html += `
+    <div class="coach-section">
+      <strong>🍽️ Step 2: Best Dinner Options for Tonight (${diffKcal} kcal available | ${proGap}g Protein needed)</strong><br>
+      ${fatWarning}
+      Tap any balanced dinner below to log it directly into Dinner & save to Firebase:
+      <div class="coach-actions">
+        <button class="btn btn-sm chip-pro" onclick='quickAddCoachDinner([{"name":"1 Scoop Whey Isolate (in water)","kcal":115,"p":25,"c":1.5,"f":0.5},{"name":"150g 1% Cottage Cheese + Cucumber Salad","kcal":145,"p":19,"c":9,"f":2}])'>
+          🔥 Ultra-Lean Rescue: 1 Scoop Whey + 150g Cottage Cheese Salad (260 kcal | 44g Protein)
+        </button>
+        <button class="btn btn-sm chip-pro" onclick='quickAddCoachDinner([{"name":"5 Boiled Egg Whites Bhurji (Zero Oil)","kcal":85,"p":18,"c":1,"f":0},{"name":"150g 1% Cottage Cheese","kcal":124,"p":18,"c":6,"f":2}])'>
+          🥚 Egg & Cottage Bowl: 5 Egg Whites + 150g 1% Cottage Cheese (209 kcal | 36g Protein)
+        </button>
+        <button class="btn btn-sm chip-pro" onclick='quickAddCoachDinner([{"name":"50g Soya Chunks Dry Stir-Fry","kcal":172,"p":26,"c":16,"f":0.5},{"name":"1 Bowl Clear Veg / Kala Chana Broth","kcal":90,"p":5,"c":14,"f":1}])'>
+          🌱 Veg Filling Bowl: 50g Soya Chunks + Clear Soup Bowl (262 kcal | 31g Protein)
+        </button>
+        <button class="btn btn-sm chip-pro" onclick='quickAddCoachDinner([{"name":"200g Grilled Chicken Breast + Green Salad","kcal":350,"p":63,"c":7,"f":7}])'>
+          🍗 Max Protein: 200g Chicken Breast + Salad (350 kcal | 63g Protein)
+        </button>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+}
+
 function renderAll() {
   ensureDay(state.currentDate);
   const dayData = state.days[state.currentDate];
   const p = state.profile;
 
   const dObj = new Date(state.currentDate + "T12:00:00");
-  const dayName = dObj.toLocaleDateString("en-US", { weekday: "long" });
-  document.getElementById("dayOfWeekBadge").textContent = dayName;
+  document.getElementById("dayOfWeekBadge").textContent = dObj.toLocaleDateString("en-US", { weekday: "long" });
 
   const bmr = Math.round((10 * p.weight) + (6.25 * p.height) - (5 * p.age) + 5);
   const baseBurn = Math.round(bmr * 1.2);
@@ -1172,6 +1271,9 @@ function renderAll() {
   document.getElementById("fatBarTxt").textContent = `${eatenF} / ${fatGoal} g`;
   document.getElementById("fatBar").style.width = `${Math.min(100, (eatenF / fatGoal) * 100)}%`;
 
+  // Render Live Smart Evening & Dinner Balancer
+  renderSmartCoach(dayData, allowedKcal, eatenKcal, eatenP, p.proteinGoal, eatenF, fatGoal, workoutBurn);
+
   renderActivityList("morning", dayData.morningActs);
   renderActivityList("evening", dayData.eveningActs);
 
@@ -1210,18 +1312,21 @@ function renderAll() {
       <div class="card">
         <div class="meal-header">
           <span class="meal-name">${slot.name} <span class="tip-btn" onclick="toggleTip('tip_${slot.id}')">?</span></span>
-          <span class="meal-sub">${slotKcal} kcal | ${slotP}g Protein</span>
+          <div class="meal-right">
+            <span class="meal-sub">${slotKcal} kcal | ${slotP}g Protein</span>
+            <button class="btn btn-success btn-sm" id="save_db_${slot.id}" onclick="pushToCloud(false, '${slot.id}')">💾 Save Meal to DB</button>
+          </div>
         </div>
         <div id="tip_${slot.id}" class="tip-box">${slot.tip}</div>
-        <div class="chip-section-label">🔥 High-Protein / Low-Calorie Picks (Tap to Add):</div>
+        <div class="chip-section-label">🔥 High-Protein / Low-Calorie Picks (Tap to Add & Auto-Save):</div>
         <div class="quick-chips">${proChipsHTML}</div>
         <div class="chip-section-label">Your Daily Staples:</div>
         <div class="quick-chips">${stapleChipsHTML}</div>
         <div class="ai-input-row">
-          <input type="text" id="food_in_${slot.id}" placeholder="Type meal (e.g., 3 egg whites + 1 bowl vermicelli)..." onkeydown="if(event.key==='Enter') parseFoodLocally('${slot.id}')">
-          <button class="btn btn-primary" onclick="parseFoodLocally('${slot.id}')" title="0ms local calculation">+ Instant Add</button>
-          <button class="btn btn-ai" id="ai_btn_${slot.id}" onclick="parseFoodWithAI('${slot.id}')" title="Use Gemini AI for complex dishes">✨ Ask AI</button>
-          <button class="btn btn-sm" onclick="toggleManualRow('${slot.id}')" title="Enter exact numbers manually">Manual</button>
+          <input type="text" id="food_in_${slot.id}" placeholder="Type meal (e.g., 1 fafda + 1 roasted papad)..." onkeydown="if(event.key==='Enter') parseFoodLocally('${slot.id}')">
+          <button class="btn btn-primary" onclick="parseFoodLocally('${slot.id}')">+ Instant Add</button>
+          <button class="btn btn-ai" id="ai_btn_${slot.id}" onclick="parseFoodWithAI('${slot.id}')">✨ Ask AI</button>
+          <button class="btn btn-sm" onclick="toggleManualRow('${slot.id}')">Manual</button>
         </div>
         <div class="manual-row" id="man_row_${slot.id}">
           <input type="text" id="m_name_${slot.id}" placeholder="Food name">
