@@ -66,7 +66,7 @@
   <header>
     <div>
       <h1>90kg → 85kg Daily AI Tracker</h1>
-      <div class="sub">Gemini 1.5 Flash | Direct API Parser</div>
+      <div class="sub">Auto-Discovery Gemini Parser | Activity + Health Override</div>
     </div>
     <div style="display:flex; gap:6px;">
       <button class="btn btn-sm" onclick="toggleSettings()">⚙️ Profile & API Key</button>
@@ -88,14 +88,20 @@
       <div><label>Daily Deficit (kcal)</label><input type="number" id="deficit" step="50" onchange="saveProfile()"></div>
       <div><label>Protein Target (g)</label><input type="number" id="proteinGoal" onchange="saveProfile()"></div>
     </div>
-    <div>
-      <label>Google Gemini API Key</label>
-      <div style="display:flex; gap:6px;">
+    <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:8px;">
+      <div>
+        <label>Google Gemini API Key</label>
         <input type="password" id="geminiKey" placeholder="Paste AQ.Ab... or AIzaSy... key" onchange="saveProfile()">
-        <button class="btn btn-primary btn-sm" style="white-space:nowrap;" onclick="testGeminiKey()">Test Key</button>
       </div>
-      <div id="keyStatus" class="sub" style="margin-top:5px;">Using stable <code>gemini-1.5-flash</code>.</div>
+      <div>
+        <label>Discovered Model</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="geminiModel" placeholder="Auto-detected" onchange="saveProfile()">
+          <button class="btn btn-primary btn-sm" style="white-space:nowrap;" onclick="testGeminiKey()">Test Key</button>
+        </div>
+      </div>
     </div>
+    <div id="keyStatus" class="sub" style="margin-top:6px;">Tap Test Key to auto-detect your account's supported Gemini model.</div>
   </div>
 
   <div class="card" style="padding:10px 14px;">
@@ -186,7 +192,7 @@
   <div id="mealsContainer"></div>
 
 <script>
-const STORAGE_KEY = "jaspreet_ai_tracker_v6";
+const STORAGE_KEY = "jaspreet_ai_tracker_v7";
 
 const MEAL_SLOTS = [
   { id: "breakfast", name: "1. Breakfast", chips: ["6 egg whites + 1 whole egg", "2 slices whole wheat toast", "1 tbsp peanut butter", "1 bowl poha"] },
@@ -204,7 +210,8 @@ let state = {
     age: 38,
     deficit: 600,
     proteinGoal: 160,
-    geminiKey: ""
+    geminiKey: "",
+    geminiModel: ""
   },
   currentDate: new Date().toISOString().split("T")[0],
   days: {}
@@ -220,7 +227,7 @@ function ensureDay(dateStr) {
 }
 
 function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("jaspreet_ai_tracker_v5") || localStorage.getItem("jaspreet_ai_tracker_v4");
+  const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("jaspreet_ai_tracker_v6") || localStorage.getItem("jaspreet_ai_tracker_v5");
   if (raw) {
     try {
       const parsed = JSON.parse(raw);
@@ -245,6 +252,7 @@ function syncProfileInputs() {
   document.getElementById("deficit").value = state.profile.deficit;
   document.getElementById("proteinGoal").value = state.profile.proteinGoal;
   document.getElementById("geminiKey").value = state.profile.geminiKey || "";
+  document.getElementById("geminiModel").value = state.profile.geminiModel || "";
   document.getElementById("currentDate").value = state.currentDate;
 }
 
@@ -256,6 +264,7 @@ function saveProfile() {
   state.profile.deficit = parseFloat(document.getElementById("deficit").value) || 600;
   state.profile.proteinGoal = parseFloat(document.getElementById("proteinGoal").value) || 160;
   state.profile.geminiKey = document.getElementById("geminiKey").value.trim();
+  state.profile.geminiModel = document.getElementById("geminiModel").value.trim();
   saveState();
   autoCalcWorkoutBurn();
   renderAll();
@@ -337,6 +346,27 @@ function editActivityKcal(idx, newVal) {
   }
 }
 
+// Automatically discover the correct active model from your API key
+async function discoverWorkingModel(apiKey) {
+  const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`, {
+    headers: { "x-goog-api-key": apiKey }
+  });
+  if (!listRes.ok) throw new Error(`API Connection Failed (${listRes.status})`);
+  const data = await listRes.json();
+  const models = (data.models || []).filter(m =>
+    Array.isArray(m.supportedGenerationMethods) &&
+    m.supportedGenerationMethods.includes("generateContent") &&
+    m.name.includes("gemini")
+  );
+  if (models.length === 0) throw new Error("No generative Gemini models found for this key.");
+
+  // Pick best available flash model
+  const preferred = models.find(m => m.name.includes("flash") && !m.name.includes("8b")) ||
+                    models.find(m => m.name.includes("flash")) ||
+                    models[0];
+  return preferred.name; // e.g. "models/gemini-2.5-flash" or "models/gemini-2.0-flash"
+}
+
 async function testGeminiKey() {
   saveProfile();
   const statusEl = document.getElementById("keyStatus");
@@ -347,11 +377,17 @@ async function testGeminiKey() {
     return;
   }
   statusEl.style.color = "var(--accent)";
-  statusEl.textContent = "Testing connection with Gemini 1.5 Flash...";
+  statusEl.textContent = "Discovering active Gemini model for your key...";
   try {
+    const discovered = await discoverWorkingModel(key);
+    state.profile.geminiModel = discovered;
+    document.getElementById("geminiModel").value = discovered;
+    saveState();
+
+    // Verify with a test call
     const items = await callGeminiFoodParser(key, "1 boiled egg white");
     statusEl.style.color = "var(--success)";
-    statusEl.textContent = `Success! Connected (${items[0]?.kcal || 17} kcal).`;
+    statusEl.textContent = `Connected successfully! Using ${discovered} (${items[0]?.kcal || 17} kcal).`;
   } catch (e) {
     statusEl.style.color = "var(--danger)";
     statusEl.textContent = `Error: ${e.message}`;
@@ -363,10 +399,18 @@ async function callGeminiFoodParser(apiKey, query) {
 Return ONLY a raw JSON array of objects with exact estimated macros. Do not wrap in markdown or backticks.
 Example format: [{"name":"2 Large Egg Whites","kcal":34,"p":7,"c":0,"f":0}]`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+  let modelName = state.profile.geminiModel;
+  if (!modelName) {
+    modelName = await discoverWorkingModel(apiKey);
+    state.profile.geminiModel = modelName;
+    document.getElementById("geminiModel").value = modelName;
+    saveState();
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
   
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 7000);
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
   const res = await fetch(url, {
     method: "POST",
@@ -383,6 +427,11 @@ Example format: [{"name":"2 Large Egg Whites","kcal":34,"p":7,"c":0,"f":0}]`;
   clearTimeout(timeoutId);
 
   if (!res.ok) {
+    // If cached model fails, re-discover once automatically
+    if (res.status === 404 || res.status === 400) {
+      state.profile.geminiModel = "";
+      return await callGeminiFoodParser(apiKey, query);
+    }
     const errObj = await res.json().catch(() => ({}));
     throw new Error(errObj?.error?.message || `HTTP ${res.status}`);
   }
@@ -406,7 +455,7 @@ async function parseFoodInput(slotId, presetText) {
 
   const apiKey = state.profile.geminiKey;
   if (!apiKey || apiKey.length < 15) {
-    alert("Please enter your Gemini API key in ⚙️ Profile & API Key first so AI can parse your Indian meals accurately.");
+    alert("Please enter your Gemini API key in ⚙️ Profile & API Key first and tap Test Key.");
     return;
   }
 
@@ -430,7 +479,7 @@ async function parseFoodInput(slotId, presetText) {
       renderAll();
     }
   } catch (err) {
-    alert(`Gemini AI Error: ${err.message}. Please check your API key.`);
+    alert(`Gemini AI Error: ${err.message}. Open ⚙️ Profile & API Key and tap Test Key to re-link.`);
   } finally {
     btnEl.disabled = false;
     btnEl.textContent = "Calculate & Add";
