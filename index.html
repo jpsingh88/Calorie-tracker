@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>90kg to 85kg Calm Tracker</title>
+  <title>90kg to 85kg Accurate Tracker</title>
   <style>
     :root[data-theme="light"] {
       --bg: #f4f7fb;
@@ -116,7 +116,7 @@
 
     .logged-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); margin-top: 8px; gap: 8px; flex-wrap: wrap; }
     .logged-nums { display: flex; align-items: center; gap: 6px; }
-    .logged-nums input { width: 56px; padding: 5px; text-align: center; border-radius: 8px; font-weight: 700; }
+    .logged-nums input { width: 58px; padding: 5px; text-align: center; border-radius: 8px; font-weight: 700; }
 
     .swap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 560px) { .swap-grid { grid-template-columns: 1fr; } }
@@ -173,7 +173,10 @@
           Today's Balance
           <button class="tip" onclick="showTip('balance')">?</button>
         </span>
-        <button class="btn btn-sm btn-danger" onclick="clearCurrentDay()">Reset Day</button>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm" onclick="recalculateTodayItems()" title="Re-run accurate macro math on today's items">🔄 Fix Today's Math</button>
+          <button class="btn btn-sm btn-danger" onclick="clearCurrentDay()">Reset Day</button>
+        </div>
       </div>
 
       <div class="rings-grid">
@@ -209,7 +212,7 @@
         </div>
         <div class="mini-pill">
           <div class="mp-val" style="color:var(--success)" id="actBurnVal">+0</div>
-          <div class="mp-lbl">Workouts <button class="tip" onclick="showTip('workouts')">?</button></div>
+          <div class="mp-lbl">Net Burn <button class="tip" onclick="showTip('workouts')">?</button></div>
         </div>
         <div class="mini-pill">
           <div class="mp-val" style="color:var(--warning)" id="carbSummaryVal">0/130g</div>
@@ -238,7 +241,7 @@
     <div class="card">
       <div class="card-header">
         <span class="card-title">
-          🏃‍♂️ Log Today's Movement
+          🏃‍♂️ Log Today's Movement (Net Active Burn)
           <button class="tip" onclick="showTip('movement')">?</button>
         </span>
         <button class="btn btn-sm" style="border-color:var(--success); color:var(--success);" onclick="logGymFuelStack()">
@@ -252,20 +255,21 @@
         <div class="period-tab" id="tabEveBtn" onclick="selectWorkoutPeriod('evening')">🌙 Evening Session</div>
       </div>
 
+      <!-- Net METs (Gross MET minus 1.0 resting BMR so resting calories are never double-counted) -->
       <div class="sport-cards">
-        <div class="sport-card selected" id="sport_gym" onclick="selectSport('Strength Training (Gym)', 3.5, 'sport_gym')">
+        <div class="sport-card selected" id="sport_gym" onclick="selectSport('Strength Training (Gym)', 2.8, 'sport_gym')">
           <span class="sport-icon">🏋️‍♂️</span>
           <span class="sport-name">Gym Lift</span>
         </div>
-        <div class="sport-card" id="sport_badm" onclick="selectSport('Badminton', 5.2, 'sport_badm')">
+        <div class="sport-card" id="sport_badm" onclick="selectSport('Badminton', 4.2, 'sport_badm')">
           <span class="sport-icon">🏸</span>
           <span class="sport-name">Badminton</span>
         </div>
-        <div class="sport-card" id="sport_pick" onclick="selectSport('Pickleball', 4.8, 'sport_pick')">
+        <div class="sport-card" id="sport_pick" onclick="selectSport('Pickleball', 3.6, 'sport_pick')">
           <span class="sport-icon">🏓</span>
           <span class="sport-name">Pickleball</span>
         </div>
-        <div class="sport-card" id="sport_walk" onclick="selectSport('Brisk Walk', 3.5, 'sport_walk')">
+        <div class="sport-card" id="sport_walk" onclick="selectSport('Brisk Walk', 2.5, 'sport_walk')">
           <span class="sport-icon">🚶‍♂️</span>
           <span class="sport-name">Brisk Walk</span>
         </div>
@@ -277,8 +281,8 @@
           <input type="number" id="actMins" value="60" oninput="calcVisualBurn()">
         </div>
         <div>
-          <label>Active Burn (kcal) <button class="tip" onclick="showTip('activeburn')">?</button></label>
-          <input type="number" id="actKcal" value="331">
+          <label>Net Active Burn (kcal) <button class="tip" onclick="showTip('activeburn')">?</button></label>
+          <input type="number" id="actKcal" value="265">
         </div>
         <button class="btn btn-primary" style="height:40px;" onclick="addVisualWorkout()">+ Add</button>
       </div>
@@ -414,7 +418,7 @@
         <div><label>Age</label><input type="number" id="age" onchange="saveProfile()"></div>
       </div>
       <div>
-        <label>Google Gemini API Key (For ✨ AI button)</label>
+        <label>Google Gemini API Key (Auto-used when a food isn't in local dictionary)</label>
         <div style="display:flex; gap:8px;">
           <input type="password" id="geminiKey" placeholder="Paste AQ.Ab... or AIzaSy... key" onchange="saveProfile()">
           <button class="btn btn-primary btn-sm" onclick="testGeminiKey()">Test Key</button>
@@ -434,21 +438,20 @@
   </nav>
 
 <script>
-const STORAGE_KEY = "jaspreet_ai_tracker_v13";
+const STORAGE_KEY = "jaspreet_ai_tracker_v14";
 
-// Safe Tooltip Dictionary (Zero inline escaping issues)
 const TIPS = {
   balance: {
     title: "Today's Balance Rings",
-    text: "The left ring shows your remaining calories for today. Stay inside the ring to lose ~0.55 kg/week.\n\nThe right ring tracks your 160g daily protein floor so you lose fat instead of muscle."
+    text: "The left ring shows your remaining calories for today. Stay inside the ring to lose ~0.55 kg/week.\n\nThe right ring tracks your 160g daily protein floor so you lose fat instead of muscle.\n\nTap '🔄 Fix Today's Math' anytime to re-calculate all items logged today using the updated nutrition engine."
   },
   base: {
     title: "Base Burn (2208 kcal)",
-    text: "Your resting BMR (1840 kcal) × 1.2 sedentary multiplier. This is what your body burns on a rest day with zero workouts."
+    text: "Your resting BMR (1840 kcal) × 1.2 sedentary multiplier. This already includes your resting BMR calories for all 24 hours of the day."
   },
   workouts: {
-    title: "Workout Burn",
-    text: "Active calories burned from your Morning (Gym/Pickleball) and Evening (Badminton/Walk) sessions today. Adding workouts increases your allowed calories for the day."
+    title: "Net Active Workout Burn",
+    text: "Uses Net METs (Gross MET minus 1.0 resting BMR) so your resting burn is never double-counted.\n\n• 60m Gym Lift = ~265 net kcal\n• 60m Pickleball = ~340 net kcal\n• 60m Badminton = ~397 net kcal\n• 60m Brisk Walk = ~236 net kcal"
   },
   carbs: {
     title: "Daily Carbs",
@@ -456,7 +459,7 @@ const TIPS = {
   },
   fats: {
     title: "Daily Fats Cap",
-    text: "Includes cooking oil, ghee, peanut butter, peanuts, and pinnis. Keep under 50-60g so hidden fats do not erase your deficit."
+    text: "Includes cooking oil, ghee, poori, halwa, peanut butter, peanuts, and pinnis. Keep under 50-60g so hidden fats do not erase your deficit."
   },
   coach: {
     title: "Post-Lunch Evening & Dinner Balancer",
@@ -464,23 +467,23 @@ const TIPS = {
   },
   movement: {
     title: "Logging Morning & Evening Workouts",
-    text: "1. Choose Morning or Evening Session.\n2. Tap a sport icon (Gym, Badminton, Pickleball, or Walk).\n3. Enter minutes OR type the exact Active Calories from your Apple/Google Health app, then tap + Add."
+    text: "1. Choose Morning or Evening Session.\n2. Tap a sport icon.\n3. Enter minutes OR type the exact Active Calories from your Apple/Google Health app, then tap + Add."
   },
   gymfuel: {
     title: "Gym Fuel Stack (161 kcal | 26g P)",
-    text: "Logs your exact pre/post gym routine in 1 tap:\n• 1/4 Banana (26 kcal)\n• 2 Espresso shots w/ drops of milk (20 kcal)\n• 1 Scoop Whey Isolate in 500ml water (115 kcal, 25g P)"
+    text: "Logs your exact pre/post gym routine in 1 tap (and prevents duplicates if you tap it twice):\n• 1/4 Banana (26 kcal)\n• 2 Espresso shots w/ drops of milk (20 kcal)\n• 1 Scoop Whey Isolate in 500ml water (115 kcal, 25g P)"
   },
   duration: {
     title: "Workout Duration (Mins)",
-    text: "Enter how many minutes you trained or played. The app automatically calculates realistic net active burn for your 90 kg weight."
+    text: "Enter how many minutes you trained or played. The app calculates realistic Net Active Burn for 90 kg."
   },
   activeburn: {
-    title: "Active Burn (Health App Override)",
-    text: "Auto-calculated from your weight and duration. You can type over this number with the exact Active Calories shown on your Apple Watch or Google Health app."
+    title: "Net Active Burn (Health App Override)",
+    text: "Auto-calculated net active burn. You can type over this number with the exact 'Active Calories' (not Total Calories) shown on your watch/phone."
   },
   weekly: {
     title: "7-Day Fat Loss Trajectory",
-    text: "Every 7,700 kcal of cumulative net deficit equals 1.0 kg of pure body fat lost.\n\nOnly complete days (where Lunch & Dinner are logged or backfilled) are counted so unlogged weekends never give you a fake deficit."
+    text: "Every 7,700 kcal of cumulative net deficit equals 1.0 kg of pure body fat lost.\n\nOnly complete days (where Lunch & Dinner are logged or backfilled) are counted."
   },
   weighin: {
     title: "Bi-Weekly Scale Weigh-In",
@@ -488,41 +491,23 @@ const TIPS = {
   },
   firebase: {
     title: "Firebase Cloud Auto-Sync",
-    text: "Paste your Firebase Realtime Database URL once on your iPhone and Laptop with the same Sync ID. Every meal and workout syncs automatically without clicking Push or Pull."
+    text: "Paste your Firebase Realtime Database URL once on your iPhone and Laptop with the same Sync ID. Every meal and workout syncs automatically."
   },
-   buttons: {
-    title: "Which Food Button Should I Tap?",
-    text: "• + Add (0.01s Instant): Uses the built-in Indian/Canadian food dictionary on your phone. Use this 95% of the time.\n\n• ✨ AI (~1.2s): Calls Google Gemini for complex or restaurant dishes.\n\n• Manual: Type exact Calories & Protein from a nutrition label."
+  buttons: {
+    title: "How + Add vs ✨ AI Works",
+    text: "• + Add: Instantly calculates any food in the expanded Indian/Canadian dictionary (including grams like 250g halwa, 25g banana, 2 poori, 2 soya chaap). If you type an unknown dish, it automatically asks Gemini AI instead of guessing 110 kcal!\n\n• ✨ AI: Directly asks Gemini AI to estimate complex restaurant meals.\n\n• Manual: Enter exact numbers from a package label."
   },
-  prepost: {
-    title: "Pre & Post-Gym Fuel",
-    text: "Your morning workout fuel: 1/4 banana + 2 espresso shots with 4-5 drops of milk pre-gym, and 1 scoop whey isolate in 500ml water post-gym."
-  },
-  breakfast: {
-    title: "Breakfast",
-    text: "2-3 egg whites alone only give 7-11g protein. Pair your vermicelli, poha, idli, uttapam, or avocado toast with 150g 1% cottage cheese or extra egg whites to hit 25g+ protein."
-  },
-  fruit: {
-    title: "Mid-Morning Fruit",
-    text: "Low-calorie, high-fiber fruit bridge between breakfast and lunch."
-  },
-  lunch: {
-    title: "Lunch (Unlocks Evening Balancer)",
-    text: "1.5 roti or rice + sabzi/dal + protein anchor (200g 1% cottage cheese, soya, tofu, or chicken). Logging Lunch unlocks your Evening & Dinner Balancer."
-  },
-  snack: {
-    title: "Evening Tea & Snack",
-    text: "Pre-badminton or evening tea slot. Watch out for high-fat pinnis and peanuts on rest days."
-  },
-  dinner: {
-    title: "Dinner (No-Roti Protein Anchor)",
-    text: "High-protein, no-roti dinner anchor so you stay full and hit 160g protein without late-night snacking."
-  }
+  prepost: { title: "Pre & Post-Gym Fuel", text: "1/4 banana + 2 espresso shots pre-gym, and 1 scoop whey isolate in 500ml water post-gym." },
+  breakfast: { title: "Breakfast", text: "Pair your vermicelli, poha, idli, uttapam, or avocado toast with 150g 1% cottage cheese or extra egg whites to hit 25g+ protein." },
+  fruit: { title: "Mid-Morning Fruit", text: "Low-calorie, high-fiber fruit bridge between breakfast and lunch." },
+  lunch: { title: "Lunch", text: "1.5 roti or rice + sabzi/dal + protein anchor. Logging Lunch unlocks your Evening & Dinner Balancer." },
+  snack: { title: "Evening Tea & Snack", text: "Pre-badminton or evening tea slot. Watch out for high-fat pinnis and peanuts on rest days." },
+  dinner: { title: "Dinner (No-Roti)", text: "High-protein, no-roti dinner anchor so you stay full and hit 160g protein." }
 };
 
 const MOTIVATION_TIPS = [
   "💡 Swap Idea: Replace 1 evening atta pinni (165 kcal, 3g P) with 150g 1% Cottage Cheese + chaat masala (123 kcal, 18g P). Saves 42 kcal and triples protein!",
-  "💡 Breakfast Rule: 2-3 egg whites alone only give 7-10g protein. Pair your poha, vermicelli, or uttapam with 150g 1% Cottage Cheese.",
+  "💡 Soya Chaap vs Soya Chunks: 2 pieces of Soya Chaap (made with maida) only have 6g protein, while 50g dry Soya Chunks have 26g pure protein!",
   "💡 Craving Buster: Blending 1 scoop Whey Isolate with ice, 1 espresso shot, and water makes a 125-kcal iced protein latte with 25g protein.",
   "💡 Crunch Swap: Top 1 roasted papad with chopped onion, tomato & 100g 1% cottage cheese (135 kcal, 15g P) instead of fafda or rusk."
 ];
@@ -530,7 +515,7 @@ let motiveIdx = 0;
 
 let selectedPeriod = "morning";
 let selectedSportName = "Strength Training (Gym)";
-let selectedSportMet = 3.5;
+let selectedSportMet = 2.8; // Net MET
 
 const MEAL_SLOTS = [
   {
@@ -590,56 +575,83 @@ const COACH_DINNER_PRESETS = [
   ]
 ];
 
+// Accurate Indian & Western Food Dictionary (Every item supports both Per-Unit AND Per-100g math!)
 const FOOD_LIBRARY = [
-  { match: /\b(espresso|black coffee)\b/, name: "Espresso Shot (w/ drops of milk)", kcal: 12, p: 0.5, c: 1, f: 0.4 },
-  { match: /\b(whey isolate|whey protein|whey|protein scoop)\b/, name: "Whey Protein Isolate (1 scoop)", kcal: 115, p: 25, c: 1.5, f: 0.5 },
-  { match: /\b(egg white|white egg|egg whites|white eggs)\b/, name: "Egg White", kcal: 17, p: 3.6, c: 0.2, f: 0 },
-  { match: /\b(whole egg|boiled egg|omelette)\b/, name: "Whole Egg", kcal: 72, p: 6.3, c: 0.4, f: 4.8 },
-  { match: /\b(plate.*idli|idli.*plate)\b/, name: "Plate Mix Veg / Fried Idli (3 pcs)", kcal: 240, p: 6, c: 38, f: 6 },
-  { match: /\b(idli|idly)\b/, name: "Idli (1 piece)", kcal: 60, p: 2, c: 12, f: 0.4 },
-  { match: /\b(avocado toast)\b/, name: "Avocado Toast (1 slice)", kcal: 195, p: 4.5, c: 20, f: 11 },
-  { match: /\b(avocado)\b/, name: "Avocado (1/2 medium)", kcal: 115, p: 1.5, c: 6, f: 10.5 },
-  { match: /\b(vermicelli|seviyan|semiya)\b/, name: "Cooked Roasted Vermicelli w/ Veggies (1 bowl)", kcal: 215, p: 5, c: 38, f: 4.5 },
-  { match: /\b(uttapam|utapam|uthappam)\b/, name: "Vegetable Uttapam (1 piece)", kcal: 145, p: 3.8, c: 25, f: 3.2 },
-  { match: /\b(poha)\b/, name: "Cooked Poha w/ Veggies (1 bowl)", kcal: 225, p: 4.5, c: 40, f: 5.5 },
-  { match: /\b(upma)\b/, name: "Rava Upma w/ Veggies (1 bowl)", kcal: 195, p: 4.5, c: 32, f: 5 },
-  { match: /\b(sambar|sambhar)\b/, name: "Sambar (1 bowl)", kcal: 135, p: 5, c: 20, f: 4 },
-  { match: /\b(dosa)\b/, name: "Plain Dosa", kcal: 165, p: 4, c: 28, f: 4 },
-  { match: /\b(oats|oatmeal)\b/, name: "Cooked Oats (1 bowl)", kcal: 190, p: 6.5, c: 34, f: 3.2 },
-  { match: /\b(toast|bread)\b/, name: "Bread / Toast Slice", kcal: 80, p: 3.5, c: 14, f: 1 },
-  { match: /\b(fafda)\b/, name: "Gujarati Fafda (1 strip)", kcal: 130, p: 3.5, c: 11, f: 8 },
-  { match: /\b(fried papad)\b/, name: "Fried Papad (1 piece)", kcal: 85, p: 2.5, c: 7, f: 5.5 },
-  { match: /\b(papad|papadum)\b/, name: "Roasted Papad (1 piece)", kcal: 40, p: 2.5, c: 6.5, f: 0.4 },
-  { match: /\b(cottage cheese)\b/, name: "1% Cottage Cheese", kcalPer100g: 82, pPer100g: 12, cPer100g: 4, fPer100g: 1.2, kcal: 164, p: 24, c: 8, f: 2.4 },
-  { match: /\b(greek yogurt)\b/, name: "0% Plain Greek Yogurt", kcalPer100g: 58, pPer100g: 10, cPer100g: 3.5, fPer100g: 0, kcal: 115, p: 20, c: 7, f: 0 },
-  { match: /\b(curd|dahi|yogurt|raita)\b/, name: "Curd / Dahi (1 bowl)", kcal: 120, p: 6, c: 9, f: 6 },
-  { match: /\b(paneer)\b/, name: "Indian Paneer (100g portion)", kcalPer100g: 265, pPer100g: 18, cPer100g: 3, fPer100g: 20, kcal: 200, p: 14, c: 2.5, f: 15 },
-  { match: /\b(chicken breast|chicken tikka|chicken curry|chicken)\b/, name: "Chicken Breast", kcalPer100g: 165, pPer100g: 31, cPer100g: 1.5, fPer100g: 3.6, kcal: 330, p: 62, c: 3, f: 7 },
-  { match: /\b(soya chunk|soya|nutrela)\b/, name: "Soya Chunks Stir-Fry (50g dry)", kcal: 172, p: 26, c: 16, f: 0.5 },
-  { match: /\b(tofu)\b/, name: "Extra Firm Tofu Bhurji (200g)", kcal: 190, p: 24, c: 4, f: 11 },
-  { match: /\b(edamame)\b/, name: "Roasted Edamame (100g)", kcal: 140, p: 12, c: 11, f: 5 },
-  { match: /\b(roti|chapati|phulka)\b/, name: "Whole Wheat Roti", kcal: 110, p: 3.5, c: 22, f: 1 },
-  { match: /\b(paratha|parantha)\b/, name: "Paratha", kcal: 240, p: 5, c: 32, f: 10 },
-  { match: /\b(rice|basmati|pulao)\b/, name: "Cooked Rice (150g bowl)", kcal: 195, p: 4, c: 43, f: 0.5 },
-  { match: /\b(black chickpea soup|kala chana soup|chickpea soup|chana soup)\b/, name: "Black Chickpea Soup (1 bowl)", kcal: 140, p: 7.5, c: 22, f: 2.5 },
-  { match: /\b(clear soup|veg soup|broth)\b/, name: "Clear Vegetable Soup (1 bowl)", kcal: 55, p: 2, c: 10, f: 0.5 },
-  { match: /\b(kala chana|black chickpea)\b/, name: "Boiled Kala Chana (1 bowl)", kcal: 210, p: 11, c: 34, f: 3 },
-  { match: /\b(rajma|chole)\b/, name: "Rajma / Chole (1 bowl)", kcal: 220, p: 11, c: 32, f: 5 },
-  { match: /\b(dal|daal|lentil)\b/, name: "Yellow / Masoor Dal (1 bowl)", kcal: 180, p: 9, c: 26, f: 4.5 },
-  { match: /\b(carrot.*pea.*potato|aloo.*gajar.*matar|potato.*sabji|potato.*sabzi|mixed.*sabzi|mixed.*sabji|sabzi|sabji|gobhi|bhindi)\b/, name: "Home Vegetable Sabzi (1 bowl)", kcal: 155, p: 3.5, c: 20, f: 6.5 },
-  { match: /\b(salad|cucumber)\b/, name: "Fresh Green Salad (1 bowl)", kcal: 45, p: 1.5, c: 9, f: 0.2 },
-  { match: /\b(peanut butter)\b/, name: "Peanut Butter (1 tbsp)", kcal: 95, p: 4, c: 3, f: 8 },
-  { match: /\b(peanut|peanuts)\b/, name: "Roasted Peanuts", kcalPer100g: 580, pPer100g: 26, cPer100g: 16, fPer100g: 50, kcal: 145, p: 6.5, c: 4, f: 12.5 },
-  { match: /\b(almond|walnut|cashew|nuts)\b/, name: "Mixed Nuts (20g)", kcalPer100g: 600, pPer100g: 20, cPer100g: 15, fPer100g: 55, kcal: 120, p: 4, c: 3, f: 11 },
-  { match: /\b(chai|tea)\b/, name: "Indian Milk Tea / Chai", kcal: 70, p: 2.5, c: 9, f: 2.5 },
-  { match: /\b(pinni|laddu)\b/, name: "Pinni / Laddu", kcal: 165, p: 3, c: 18, f: 9 },
-  { match: /\b(rusk)\b/, name: "Rusk", kcal: 45, p: 1.2, c: 8, f: 1 },
-  { match: /\b(makhana)\b/, name: "Roasted Makhana (1 bowl)", kcal: 110, p: 3, c: 22, f: 1 },
-  { match: /\b(cake)\b/, name: "Cake (1 spoon)", kcal: 45, p: 0.5, c: 6, f: 2 },
-  { match: /\b(banana)\b/, name: "Medium Banana", kcal: 105, p: 1.3, c: 27, f: 0.4 },
-  { match: /\b(apple|pear)\b/, name: "Medium Apple", kcal: 95, p: 0.5, c: 25, f: 0.3 },
-  { match: /\b(orange)\b/, name: "Medium Orange", kcal: 85, p: 1.5, c: 21, f: 0.2 },
-  { match: /\b(berries|strawberry|blueberry)\b/, name: "Mixed Berries", kcalPer100g: 50, pPer100g: 0.7, cPer100g: 11, fPer100g: 0.3, kcal: 75, p: 1, c: 17, f: 0.4 }
+  // Pre/Post Gym & Coffee
+  { match: /\b(espresso|black coffee)\b/, name: "Espresso Shot (w/ drops of milk)", kcal: 10, p: 0.5, c: 1, f: 0.4, kcalPer100g: 30, pPer100g: 1.5, cPer100g: 3, fPer100g: 1 },
+  { match: /\b(whey isolate|whey protein|whey|protein scoop)\b/, name: "Whey Protein Isolate (1 scoop)", kcal: 115, p: 25, c: 1.5, f: 0.5, kcalPer100g: 370, pPer100g: 82, cPer100g: 5, fPer100g: 1.5 },
+
+  // Egg Whites & Eggs
+  { match: /\b(egg white|white egg|egg whites|white eggs)\b/, name: "Egg White", kcal: 17, p: 3.6, c: 0.2, f: 0, kcalPer100g: 52, pPer100g: 11, cPer100g: 0.7, fPer100g: 0.2 },
+  { match: /\b(whole egg|boiled egg|omelette)\b/, name: "Whole Egg", kcal: 72, p: 6.3, c: 0.4, f: 4.8, kcalPer100g: 155, pPer100g: 13, cPer100g: 1.1, fPer100g: 11 },
+
+  // Soya Chaap vs Dry Soya Chunks (CRITICAL DISTINCTION)
+  { match: /\b(soya chaap|chaap)\b/, name: "Soya Chaap Piece", kcal: 55, p: 3.2, c: 6, f: 2, kcalPer100g: 185, pPer100g: 11, cPer100g: 20, fPer100g: 7 },
+  { match: /\b(soya chunk|soya|nutrela)\b/, name: "Soya Chunks Stir-Fry (50g dry bowl)", kcal: 172, p: 26, c: 16, f: 0.5, kcalPer100g: 345, pPer100g: 52, cPer100g: 33, fPer100g: 1 },
+
+  // Indian Festival, Street & Indo-Chinese Foods (Poori, Halwa, Channe, Manchurian, Samosa)
+  { match: /\b(poori|puri|bedmi)\b/, name: "Fried Poori", kcal: 130, p: 2.2, c: 16, f: 6.5, kcalPer100g: 360, pPer100g: 6, cPer100g: 45, fPer100g: 18 },
+  { match: /\b(halwa|sooji halwa|suji halwa|atta halwa|moong halwa|gajar halwa)\b/, name: "Indian Halwa (1 bowl / 100g)", kcal: 290, p: 3.5, c: 38, f: 14, kcalPer100g: 290, pPer100g: 3.5, cPer100g: 38, fPer100g: 14 },
+  { match: /\b(black chickpea soup|kala chana soup|chickpea soup|chana soup)\b/, name: "Black Chickpea Soup (1 bowl)", kcal: 140, p: 7.5, c: 22, f: 2.5, kcalPer100g: 70, pPer100g: 3.8, cPer100g: 11, fPer100g: 1.2 },
+  { match: /\b(kala chana|black chana|black channe|kala channe|channe|chane|black chickpea)\b/, name: "Cooked Black Chana / Channe", kcal: 210, p: 11, c: 32, f: 4.5, kcalPer100g: 155, pPer100g: 8.5, cPer100g: 24, fPer100g: 3.2 },
+  { match: /\b(manchurian|gobi manchurian|veg manchurian)\b/, name: "Veg Manchurian Ball (1 pc)", kcal: 65, p: 1.5, c: 7.5, f: 3.2, kcalPer100g: 215, pPer100g: 5, cPer100g: 25, fPer100g: 11 },
+  { match: /\b(samosa|kachori)\b/, name: "Samosa / Kachori (1 pc)", kcal: 260, p: 4.5, c: 30, f: 14, kcalPer100g: 310, pPer100g: 5.5, cPer100g: 36, fPer100g: 17 },
+  { match: /\b(pakora|pakoda|bhajiya)\b/, name: "Pakora (1 pc)", kcal: 55, p: 1.5, c: 5, f: 3.2, kcalPer100g: 315, pPer100g: 8, cPer100g: 30, fPer100g: 18 },
+  { match: /\b(bhatura|bhature)\b/, name: "Fried Bhatura (1 pc)", kcal: 290, p: 6, c: 42, f: 11, kcalPer100g: 350, pPer100g: 7, cPer100g: 50, fPer100g: 13 },
+
+  // Breakfast & South Indian
+  { match: /\b(plate.*idli|idli.*plate)\b/, name: "Plate Mix Veg / Fried Idli (3 pcs)", kcal: 240, p: 6, c: 38, f: 6, kcalPer100g: 150, pPer100g: 4, cPer100g: 24, fPer100g: 4 },
+  { match: /\b(idli|idly)\b/, name: "Idli (1 piece)", kcal: 60, p: 2, c: 12, f: 0.4, kcalPer100g: 140, pPer100g: 4.5, cPer100g: 28, fPer100g: 0.8 },
+  { match: /\b(avocado toast)\b/, name: "Avocado Toast (1 slice)", kcal: 195, p: 4.5, c: 20, f: 11, kcalPer100g: 210, pPer100g: 5, cPer100g: 22, fPer100g: 12 },
+  { match: /\b(avocado)\b/, name: "Avocado (1/2 medium)", kcal: 115, p: 1.5, c: 6, f: 10.5, kcalPer100g: 160, pPer100g: 2, cPer100g: 8.5, fPer100g: 15 },
+  { match: /\b(vermicelli|seviyan|semiya)\b/, name: "Cooked Roasted Vermicelli w/ Veggies (1 bowl)", kcal: 215, p: 5, c: 38, f: 4.5, kcalPer100g: 130, pPer100g: 3, cPer100g: 23, fPer100g: 2.8 },
+  { match: /\b(uttapam|utapam|uthappam)\b/, name: "Vegetable Uttapam (1 piece)", kcal: 145, p: 3.8, c: 25, f: 3.2, kcalPer100g: 160, pPer100g: 4.2, cPer100g: 28, fPer100g: 3.5 },
+  { match: /\b(poha)\b/, name: "Cooked Poha w/ Veggies (1 bowl)", kcal: 225, p: 4.5, c: 40, f: 5.5, kcalPer100g: 140, pPer100g: 2.8, cPer100g: 25, fPer100g: 3.5 },
+  { match: /\b(upma)\b/, name: "Rava Upma w/ Veggies (1 bowl)", kcal: 195, p: 4.5, c: 32, f: 5, kcalPer100g: 130, pPer100g: 3, cPer100g: 21, fPer100g: 3.3 },
+  { match: /\b(sambar|sambhar)\b/, name: "Sambar (1 bowl)", kcal: 135, p: 5, c: 20, f: 4, kcalPer100g: 68, pPer100g: 2.5, cPer100g: 10, fPer100g: 2 },
+  { match: /\b(dosa)\b/, name: "Plain Dosa", kcal: 165, p: 4, c: 28, f: 4, kcalPer100g: 185, pPer100g: 4.5, cPer100g: 31, fPer100g: 4.5 },
+  { match: /\b(oats|oatmeal)\b/, name: "Cooked Oats (1 bowl)", kcal: 190, p: 6.5, c: 34, f: 3.2, kcalPer100g: 110, pPer100g: 3.8, cPer100g: 20, fPer100g: 1.8 },
+  { match: /\b(toast|bread)\b/, name: "Bread / Toast Slice", kcal: 80, p: 3.5, c: 14, f: 1, kcalPer100g: 265, pPer100g: 9, cPer100g: 49, fPer100g: 3.2 },
+
+  // Savories
+  { match: /\b(fafda)\b/, name: "Gujarati Fafda (1 strip)", kcal: 130, p: 3.5, c: 11, f: 8, kcalPer100g: 520, pPer100g: 14, cPer100g: 44, fPer100g: 32 },
+  { match: /\b(fried papad)\b/, name: "Fried Papad (1 piece)", kcal: 85, p: 2.5, c: 7, f: 5.5, kcalPer100g: 480, pPer100g: 14, cPer100g: 40, fPer100g: 30 },
+  { match: /\b(papad|papadum)\b/, name: "Roasted Papad (1 piece)", kcal: 40, p: 2.5, c: 6.5, f: 0.4, kcalPer100g: 320, pPer100g: 20, cPer100g: 52, fPer100g: 3 },
+
+  // Dairy, Meat & Tofu
+  { match: /\b(cottage cheese)\b/, name: "1% Cottage Cheese", kcal: 164, p: 24, c: 8, f: 2.4, kcalPer100g: 82, pPer100g: 12, cPer100g: 4, fPer100g: 1.2 },
+  { match: /\b(greek yogurt)\b/, name: "0% Plain Greek Yogurt", kcal: 115, p: 20, c: 7, f: 0, kcalPer100g: 58, pPer100g: 10, cPer100g: 3.5, fPer100g: 0 },
+  { match: /\b(curd|dahi|yogurt|raita)\b/, name: "Curd / Dahi (1 bowl)", kcal: 120, p: 6, c: 9, f: 6, kcalPer100g: 62, pPer100g: 3.2, cPer100g: 4.7, fPer100g: 3.2 },
+  { match: /\b(paneer)\b/, name: "Indian Paneer (100g)", kcal: 265, p: 18, c: 3, f: 20, kcalPer100g: 265, pPer100g: 18, cPer100g: 3, fPer100g: 20 },
+  { match: /\b(chicken breast|chicken tikka|chicken curry|chicken)\b/, name: "Chicken Breast", kcal: 330, p: 62, c: 3, f: 7, kcalPer100g: 165, pPer100g: 31, cPer100g: 1.5, fPer100g: 3.6 },
+  { match: /\b(tofu)\b/, name: "Extra Firm Tofu Bhurji (200g)", kcal: 190, p: 24, c: 4, f: 11, kcalPer100g: 95, pPer100g: 12, cPer100g: 2, fPer100g: 5.5 },
+  { match: /\b(edamame)\b/, name: "Roasted Edamame", kcal: 140, p: 12, c: 11, f: 5, kcalPer100g: 140, pPer100g: 12, cPer100g: 11, fPer100g: 5 },
+
+  // Lunch & Dinner Staples
+  { match: /\b(roti|chapati|phulka)\b/, name: "Whole Wheat Roti", kcal: 110, p: 3.5, c: 22, f: 1, kcalPer100g: 290, pPer100g: 9, cPer100g: 58, fPer100g: 2.5 },
+  { match: /\b(paratha|parantha)\b/, name: "Paratha", kcal: 240, p: 5, c: 32, f: 10, kcalPer100g: 320, pPer100g: 6.5, cPer100g: 43, fPer100g: 13 },
+  { match: /\b(rice|basmati|pulao)\b/, name: "Cooked Rice (150g bowl)", kcal: 195, p: 4, c: 43, f: 0.5, kcalPer100g: 130, pPer100g: 2.7, cPer100g: 28, fPer100g: 0.3 },
+  { match: /\b(clear soup|veg soup|broth)\b/, name: "Clear Vegetable Soup (1 bowl)", kcal: 55, p: 2, c: 10, f: 0.5, kcalPer100g: 28, pPer100g: 1, cPer100g: 5, fPer100g: 0.3 },
+  { match: /\b(rajma|chole)\b/, name: "Rajma / Chole (1 bowl)", kcal: 220, p: 11, c: 32, f: 5, kcalPer100g: 110, pPer100g: 5.5, cPer100g: 16, fPer100g: 2.5 },
+  { match: /\b(dal|daal|lentil)\b/, name: "Yellow / Masoor Dal (1 bowl)", kcal: 180, p: 9, c: 26, f: 4.5, kcalPer100g: 90, pPer100g: 4.5, cPer100g: 13, fPer100g: 2.2 },
+  { match: /\b(carrot.*pea.*potato|aloo.*gajar.*matar|potato.*sabji|potato.*sabzi|mixed.*sabzi|mixed.*sabji|sabzi|sabji|gobhi|bhindi)\b/, name: "Home Vegetable Sabzi (1 bowl)", kcal: 155, p: 3.5, c: 20, f: 6.5, kcalPer100g: 100, pPer100g: 2.2, cPer100g: 13, fPer100g: 4.2 },
+  { match: /\b(salad|cucumber)\b/, name: "Fresh Green Salad (1 bowl)", kcal: 45, p: 1.5, c: 9, f: 0.2, kcalPer100g: 25, pPer100g: 0.8, cPer100g: 5, fPer100g: 0.1 },
+
+  // Nuts, Tea & Sweets
+  { match: /\b(peanut butter)\b/, name: "Peanut Butter (1 tbsp)", kcal: 95, p: 4, c: 3, f: 8, kcalPer100g: 588, pPer100g: 25, cPer100g: 20, fPer100g: 50 },
+  { match: /\b(peanut|peanuts)\b/, name: "Roasted Peanuts (25g)", kcal: 145, p: 6.5, c: 4, f: 12.5, kcalPer100g: 580, pPer100g: 26, cPer100g: 16, fPer100g: 50 },
+  { match: /\b(almond|walnut|cashew|nuts)\b/, name: "Mixed Nuts (20g)", kcal: 120, p: 4, c: 3, f: 11, kcalPer100g: 600, pPer100g: 20, cPer100g: 15, fPer100g: 55 },
+  { match: /\b(chai|tea)\b/, name: "Indian Milk Tea / Chai", kcal: 70, p: 2.5, c: 9, f: 2.5, kcalPer100g: 45, pPer100g: 1.6, cPer100g: 6, fPer100g: 1.6 },
+  { match: /\b(pinni|laddu)\b/, name: "Pinni / Laddu (1 pc)", kcal: 165, p: 3, c: 18, f: 9, kcalPer100g: 440, pPer100g: 8, cPer100g: 48, fPer100g: 24 },
+  { match: /\b(rusk)\b/, name: "Tea Rusk (1 pc)", kcal: 45, p: 1.2, c: 8, f: 1, kcalPer100g: 410, pPer100g: 11, cPer100g: 72, fPer100g: 9 },
+  { match: /\b(makhana)\b/, name: "Roasted Makhana (30g bowl)", kcal: 110, p: 3, c: 22, f: 1, kcalPer100g: 350, pPer100g: 9.7, cPer100g: 76, fPer100g: 0.5 },
+  { match: /\b(cake)\b/, name: "Cake (1 spoon)", kcal: 45, p: 0.5, c: 6, f: 2, kcalPer100g: 370, pPer100g: 4, cPer100g: 50, fPer100g: 16 },
+
+  // Fruits (With exact per-100g values so "25g banana" = 22 kcal, not 105 kcal!)
+  { match: /\b(banana)\b/, name: "Banana", kcal: 105, p: 1.3, c: 27, f: 0.4, kcalPer100g: 89, pPer100g: 1.1, cPer100g: 23, fPer100g: 0.3 },
+  { match: /\b(apple|pear)\b/, name: "Medium Apple", kcal: 95, p: 0.5, c: 25, f: 0.3, kcalPer100g: 52, pPer100g: 0.3, cPer100g: 14, fPer100g: 0.2 },
+  { match: /\b(orange)\b/, name: "Medium Orange", kcal: 85, p: 1.5, c: 21, f: 0.2, kcalPer100g: 47, pPer100g: 0.9, cPer100g: 12, fPer100g: 0.1 },
+  { match: /\b(berries|strawberry|blueberry)\b/, name: "Mixed Berries", kcal: 75, p: 1, c: 17, f: 0.4, kcalPer100g: 50, pPer100g: 0.7, cPer100g: 11, fPer100g: 0.3 }
 ];
 
 const WORD_NUMS = {
@@ -662,7 +674,7 @@ function addDaysISO(dateStr, offset) {
 let state = {
   updatedAt: 0,
   theme: "light",
-  openSlotId: "breakfast",
+  openSlotId: "lunch",
   profile: {
     weight: 90,
     targetWeight: 85,
@@ -733,7 +745,7 @@ function pickDefaultOpenSlot() {
 }
 
 async function loadState() {
-  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v12", "jaspreet_ai_tracker_v11", "jaspreet_ai_tracker_v10", "jaspreet_ai_tracker_v9"];
+  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v13", "jaspreet_ai_tracker_v12", "jaspreet_ai_tracker_v11", "jaspreet_ai_tracker_v10"];
   for (let i = 0; i < keys.length; i++) {
     const raw = localStorage.getItem(keys[i]);
     if (raw) {
@@ -803,9 +815,9 @@ function selectWorkoutPeriod(p) {
   document.getElementById("tabEveBtn").classList.toggle("active", p === "evening");
 }
 
-function selectSport(name, met, cardId) {
+function selectSport(name, netMet, cardId) {
   selectedSportName = name;
-  selectedSportMet = met;
+  selectedSportMet = netMet;
   ["sport_gym", "sport_badm", "sport_pick", "sport_walk"].forEach(function(id) {
     document.getElementById(id).classList.toggle("selected", id === cardId);
   });
@@ -814,6 +826,7 @@ function selectSport(name, met, cardId) {
 
 function calcVisualBurn() {
   const mins = parseFloat(document.getElementById("actMins").value) || 0;
+  // Net Active Burn = Net MET * 3.5 * weight_kg / 200 * mins
   const burned = Math.round((selectedSportMet * 3.5 * state.profile.weight / 200) * mins);
   document.getElementById("actKcal").value = burned;
 }
@@ -1040,13 +1053,14 @@ function editSlotActivityKcal(period, idx, val) {
   }
 }
 
+// Prevents duplicate entries if tapped multiple times
 function logGymFuelStack() {
   ensureDay(state.currentDate);
-  state.days[state.currentDate].meals.prepost.push(
+  state.days[state.currentDate].meals.prepost = [
     { name: "1/4 Banana (Pre-Gym)", kcal: 26, p: 0.3, c: 7, f: 0.1 },
     { name: "2 Espresso Shots w/ drops of milk", kcal: 20, p: 1, c: 2, f: 0.8 },
     { name: "1 Scoop Whey Isolate (500ml water)", kcal: 115, p: 25, c: 1.5, f: 0.5 }
-  );
+  ];
   state.openSlotId = "prepost";
   saveState("prepost");
   renderAll();
@@ -1054,7 +1068,7 @@ function logGymFuelStack() {
 
 async function callGeminiFast(apiKey, query) {
   const candidates = ["models/gemini-3.8-flash-lite", "models/gemini-3.8-flash", "models/gemini-2.5-flash-lite"];
-  const prompt = "Indian/Western nutritionist: parse \"" + query + "\". Return ONLY raw JSON array: [{\"name\":\"Item\",\"kcal\":100,\"p\":5,\"c\":10,\"f\":3}]";
+  const prompt = "You are an expert Indian nutritionist. Parse \"" + query + "\" into exact realistic calories and macros (in grams). Watch out for Indian items like poori, suji/atta halwa, kala chana, soya chaap vs dry soya chunks, manchurian, pinni. Return ONLY raw JSON array: [{\"name\":\"Item\",\"kcal\":100,\"p\":5,\"c\":10,\"f\":3}]";
   let lastErr = "";
   for (let i = 0; i < candidates.length; i++) {
     const modelName = candidates[i];
@@ -1064,7 +1078,7 @@ async function callGeminiFast(apiKey, query) {
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 160 }
+        generationConfig: { temperature: 0.1, maxOutputTokens: 200 }
       })
     });
     if (res.ok) {
@@ -1098,12 +1112,16 @@ function extractQuantityAndGrams(str) {
   let lower = str.toLowerCase();
   lower = lower.replace(/\d+(?:-\d+)?\s*drops?\s*(?:of\s*)?milk/g, "");
   lower = lower.replace(/\d+\s*ml\s*(?:of\s*)?water/g, "");
+
   const gramMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:g|gm|grams)\b/);
   if (gramMatch) return { grams: parseFloat(gramMatch[1]), qty: 1 };
+
   const fracMatch = lower.match(/\b(\d+)\s*\/\s*(\d+)\b/);
   if (fracMatch) return { grams: null, qty: parseFloat(fracMatch[1]) / (parseFloat(fracMatch[2]) || 1) };
+
   const decMatch = lower.match(/(\d+(?:\.\d+)?)/);
   if (decMatch) return { grams: null, qty: parseFloat(decMatch[1]) };
+
   const words = lower.split(/\s+/);
   for (let i = 0; i < words.length; i++) {
     if (WORD_NUMS[words[i]] !== undefined) return { grams: null, qty: WORD_NUMS[words[i]] };
@@ -1111,76 +1129,126 @@ function extractQuantityAndGrams(str) {
   return { grams: null, qty: 1 };
 }
 
-function parseFoodLocally(slotId, presetText) {
+// Compute a single food part from local dictionary; returns null if not found
+function computeSingleFoodPart(cleanPart) {
+  const lower = cleanPart.toLowerCase();
+  const parsedQty = extractQuantityAndGrams(lower);
+  const grams = parsedQty.grams;
+  const qty = parsedQty.qty;
+
+  let matched = null;
+  for (let i = 0; i < FOOD_LIBRARY.length; i++) {
+    if (FOOD_LIBRARY[i].match.test(lower)) { matched = FOOD_LIBRARY[i]; break; }
+  }
+  if (!matched) return null;
+
+  if (grams && matched.kcalPer100g) {
+    const factor = grams / 100;
+    return {
+      name: cleanPart,
+      kcal: Math.round(matched.kcalPer100g * factor),
+      p: Math.round(matched.pPer100g * factor * 10) / 10,
+      c: Math.round(matched.cPer100g * factor),
+      f: Math.round(matched.fPer100g * factor)
+    };
+  } else {
+    const sizeMult = /\bsmall\b/.test(lower) ? 0.75 : 1;
+    const mult = qty * sizeMult;
+    return {
+      name: cleanPart,
+      kcal: Math.round(matched.kcal * mult),
+      p: Math.round(matched.p * mult * 10) / 10,
+      c: Math.round(matched.c * mult),
+      f: Math.round(matched.f * mult)
+    };
+  }
+}
+
+// 1-Tap Recalculate all items logged today using the fixed nutrition engine
+function recalculateTodayItems() {
+  ensureDay(state.currentDate);
+  const d = state.days[state.currentDate];
+
+  // Fix Morning/Evening workout net burn if they were 60m Pickleball (454 -> 340) or 60m Walk (331 -> 236)
+  (d.morningActs || []).forEach(function(a) {
+    if (a.name.indexOf("Pickleball") !== -1 && a.kcal === 454) a.kcal = 340;
+    if (a.name.indexOf("Walk") !== -1 && a.kcal === 331) a.kcal = 236;
+  });
+  (d.eveningActs || []).forEach(function(a) {
+    if (a.name.indexOf("Pickleball") !== -1 && a.kcal === 454) a.kcal = 340;
+    if (a.name.indexOf("Walk") !== -1 && a.kcal === 331) a.kcal = 236;
+  });
+
+  Object.keys(d.meals).forEach(function(slotId) {
+    d.meals[slotId] = d.meals[slotId].map(function(item) {
+      const recalced = computeSingleFoodPart(item.name);
+      return recalced ? recalced : item;
+    });
+  });
+
+  saveState();
+  renderAll();
+  alert("Recalculated today's meals and net workout burn with accurate macros!");
+}
+
+async function parseFoodLocally(slotId, presetText) {
   const inputEl = document.getElementById("food_in_" + slotId);
   const query = (presetText || (inputEl ? inputEl.value : "")).trim();
   if (!query) return;
 
-  const normalized = query.replace(/\bwith\s+(?=paneer|dal|sambar|sambhar|curd|dahi|chicken|soya|egg|roti|rice|chole|rajma)/gi, " + ");
-  const parts = normalized.split(/\s*(?:\+|,|\band\b|\/)\s*/i).filter(Boolean);
+  // NEVER split on '/' when it is between digits like "1/4 banana"
+  const normalized = query
+    .replace(/\bwith\s+(?=paneer|dal|sambar|sambhar|curd|dahi|chicken|soya|egg|roti|rice|chole|rajma)/gi, " + ")
+    .replace(/([a-zA-Z])\s*\/\s*([a-zA-Z])/g, "$1 + $2");
+
+  const parts = normalized.split(/\s*(?:\+|,|\band\b)\s*/i).filter(Boolean);
+  const unknownParts = [];
 
   parts.forEach(function(part) {
     const cleanPart = part.trim();
     if (!cleanPart || /^\d*\s*ml\s*water$/i.test(cleanPart)) return;
-    const lower = cleanPart.toLowerCase();
-    const parsedQty = extractQuantityAndGrams(lower);
-    const grams = parsedQty.grams;
-    const qty = parsedQty.qty;
-
-    let matched = null;
-    for (let i = 0; i < FOOD_LIBRARY.length; i++) {
-      if (FOOD_LIBRARY[i].match.test(lower)) { matched = FOOD_LIBRARY[i]; break; }
-    }
-
-    if (matched) {
-      if (grams && matched.kcalPer100g) {
-        const factor = grams / 100;
-        state.days[state.currentDate].meals[slotId].push({
-          name: grams + "g " + matched.name,
-          kcal: Math.round(matched.kcalPer100g * factor),
-          p: Math.round(matched.pPer100g * factor * 10) / 10,
-          c: Math.round(matched.cPer100g * factor),
-          f: Math.round(matched.fPer100g * factor)
-        });
-      } else {
-        const sizeMult = /\bsmall\b/.test(lower) ? 0.8 : 1;
-        const mult = qty * sizeMult;
-        state.days[state.currentDate].meals[slotId].push({
-          name: cleanPart,
-          kcal: Math.round(matched.kcal * mult),
-          p: Math.round(matched.p * mult * 10) / 10,
-          c: Math.round(matched.c * mult),
-          f: Math.round(matched.f * mult)
-        });
-      }
+    const computed = computeSingleFoodPart(cleanPart);
+    if (computed) {
+      state.days[state.currentDate].meals[slotId].push(computed);
     } else {
-      state.days[state.currentDate].meals[slotId].push({
-        name: cleanPart,
-        kcal: 110, p: 4, c: 14, f: 4
-      });
+      unknownParts.push(cleanPart);
     }
   });
 
   if (inputEl) inputEl.value = "";
   state.openSlotId = slotId;
+
+  // If any typed food wasn't in the local dictionary, DO NOT guess 110 kcal — ask Gemini AI or prompt user!
+  if (unknownParts.length > 0) {
+    const unknownQuery = unknownParts.join(" + ");
+    if (state.profile.geminiKey && state.profile.geminiKey.length >= 15) {
+      await parseFoodWithAI(slotId, unknownQuery);
+      return;
+    } else {
+      alert("'" + unknownQuery + "' is not in the offline list. Enter its calories in the Manual box below or add your Gemini API Key in ⚙️ Setup.");
+      toggleManualRow(slotId);
+      const mName = document.getElementById("m_name_" + slotId);
+      if (mName) mName.value = unknownQuery;
+    }
+  }
+
   saveState(slotId);
   renderAll();
 }
 
-async function parseFoodWithAI(slotId) {
+async function parseFoodWithAI(slotId, overrideQuery) {
   const inputEl = document.getElementById("food_in_" + slotId);
   const btnEl = document.getElementById("ai_btn_" + slotId);
-  const query = inputEl.value.trim();
+  const query = (overrideQuery || (inputEl ? inputEl.value : "")).trim();
   if (!query) return;
 
   const apiKey = state.profile.geminiKey;
   if (!apiKey || apiKey.length < 15) {
-    alert("Paste your Gemini API key in ⚙️ Setup, or tap '+ Add'.");
+    alert("Paste your Gemini API key in ⚙️ Setup first.");
     return;
   }
 
-  btnEl.disabled = true;
-  btnEl.textContent = "⏳";
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = "⏳"; }
   try {
     const items = await callGeminiFast(apiKey, query);
     if (Array.isArray(items) && items.length > 0) {
@@ -1193,22 +1261,21 @@ async function parseFoodWithAI(slotId) {
           f: Math.round(Number(it.f) || 0)
         });
       });
-      inputEl.value = "";
+      if (inputEl) inputEl.value = "";
       state.openSlotId = slotId;
       saveState(slotId);
       renderAll();
     }
   } catch (err) {
-    parseFoodLocally(slotId, query);
+    alert("AI Error: " + err.message);
   } finally {
-    btnEl.disabled = false;
-    btnEl.textContent = "✨ AI";
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = "✨ AI"; }
   }
 }
 
 function toggleManualRow(slotId) {
   const row = document.getElementById("man_row_" + slotId);
-  row.style.display = row.style.display === "grid" ? "none" : "grid";
+  if (row) row.style.display = row.style.display === "grid" ? "none" : "grid";
 }
 
 function addManualFood(slotId) {
@@ -1385,13 +1452,13 @@ function renderConditionalCoach(dayData, allowedKcal, eatenKcal, eatenP, protein
   coachCard.style.display = "block";
   const remaining = allowedKcal - eatenKcal;
   const proGap = Math.max(0, Math.round(proteinGoal - eatenP));
-  const walk45Burn = Math.round((3.5 * 3.5 * state.profile.weight / 200) * 45);
+  const walk45Burn = Math.round((2.5 * 3.5 * state.profile.weight / 200) * 45);
 
   document.getElementById("coachBadge").textContent = remaining + " kcal left | " + proGap + "g P needed";
 
   let walkBtn = "";
   if (workoutBurn === 0 || remaining < 300) {
-    walkBtn = '<button class="btn btn-sm btn-success" onclick="quickAddCoachActivity(\'evening\', \'Evening Brisk Walk\', 45, ' + walk45Burn + ')">🚶‍♂️ +45m Evening Walk (+' + walk45Burn + ' kcal buffer)</button>';
+    walkBtn = '<button class="btn btn-sm btn-success" onclick="quickAddCoachActivity(\'evening\', \'Evening Brisk Walk\', 45, ' + walk45Burn + ')">🚶‍♂️ +45m Evening Walk (+' + walk45Burn + ' net kcal)</button>';
   }
 
   document.getElementById("coachBody").innerHTML =
@@ -1526,7 +1593,7 @@ function renderAll() {
         '<div class="meal-body">' +
           '<div class="chip-scroll">' + proChipsHTML + stapleChipsHTML + '</div>' +
           '<div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">' +
-            '<input type="text" id="food_in_' + slot.id + '" style="flex:1; min-width:160px;" placeholder="Type food (e.g. 3 egg whites + poha)..." onkeydown="if(event.key===\'Enter\') parseFoodLocally(\'' + slot.id + '\')">' +
+            '<input type="text" id="food_in_' + slot.id + '" style="flex:1; min-width:160px;" placeholder="Type food (e.g. 2 poori + 250g halwa)..." onkeydown="if(event.key===\'Enter\') parseFoodLocally(\'' + slot.id + '\')">' +
             '<button class="btn btn-primary btn-sm" onclick="parseFoodLocally(\'' + slot.id + '\')">+ Add</button>' +
             '<button class="btn btn-ai btn-sm" id="ai_btn_' + slot.id + '" onclick="parseFoodWithAI(\'' + slot.id + '\')">✨ AI</button>' +
             '<button class="btn btn-sm" onclick="toggleManualRow(\'' + slot.id + '\')">Manual</button>' +
