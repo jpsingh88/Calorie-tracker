@@ -61,8 +61,12 @@
     .tip { display: inline-flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 0.72rem; font-weight: 800; cursor: pointer; border: none; flex-shrink: 0; }
     .tip:hover { transform: scale(1.08); }
 
-    .tooltip-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
+    /* Modals: Tooltip & Working On It Loader */
+    .tooltip-backdrop, .loader-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
     .tooltip-box { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; max-width: 420px; width: 100%; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); }
+    .loader-box { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; max-width: 320px; width: 100%; padding: 24px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .big-spinner { width: 38px; height: 38px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .rings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; margin-bottom: 16px; }
     @media (max-width: 520px) { .rings-grid { grid-template-columns: 1fr; } }
@@ -129,6 +133,15 @@
 </head>
 <body>
 
+  <!-- Full-Screen "Working on it..." Popup Modal -->
+  <div class="loader-backdrop" id="workingModal">
+    <div class="loader-box">
+      <div class="big-spinner"></div>
+      <strong id="workingTitle" style="font-size:1.02rem; color:var(--text);">Working on it...</strong>
+      <div id="workingSub" style="font-size:0.8rem; color:var(--muted); line-height:1.4;">Calculating macros &amp; syncing with your database</div>
+    </div>
+  </div>
+
   <!-- Floating Tooltip Modal -->
   <div class="tooltip-backdrop" id="tipModal" onclick="closeTip()">
     <div class="tooltip-box" onclick="event.stopPropagation()">
@@ -175,7 +188,7 @@
           <button class="tip" onclick="showTip('balance')">?</button>
         </span>
         <div style="display:flex; gap:6px;">
-          <button class="btn btn-sm" onclick="recalculateTodayItems()" title="Re-run accurate macro math on today's items">🔄 Fix Today's Math</button>
+          <button class="btn btn-sm" onclick="recalculateTodayItems()" title="Clean up broken rows & recalculate today's items">🔄 Fix Today's Math</button>
           <button class="btn btn-sm btn-danger" onclick="clearCurrentDay()">Reset Day</button>
         </div>
       </div>
@@ -382,7 +395,7 @@
     </div>
   </div>
 
-  <!-- TAB 4: SETTINGS, CSV EXPORT, API KEY & FIREBASE DB -->
+  <!-- TAB 4: SETTINGS, CSV EXPORT, MULTI-AI & FIREBASE DB -->
   <div id="tab_settings" style="display:none;">
     <div class="card">
       <div class="card-header">
@@ -427,7 +440,10 @@
 
     <div class="card">
       <div class="card-header">
-        <span class="card-title">⚙️ Body Stats & Gemini AI Key</span>
+        <span class="card-title">
+          🤖 AI Provider (Gemini vs OpenAI ChatGPT) & Body Stats
+          <button class="tip" onclick="showTip('aiprovider')">?</button>
+        </span>
       </div>
       <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:12px;">
         <div><label>Current Weight (kg)</label><input type="number" id="weight" step="0.2" onchange="saveProfile()"></div>
@@ -437,20 +453,38 @@
         <div><label>Height (cm)</label><input type="number" id="height" onchange="saveProfile()"></div>
         <div><label>Age</label><input type="number" id="age" onchange="saveProfile()"></div>
       </div>
-      <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:8px;">
+
+      <div style="margin-bottom:10px;">
+        <label>Select AI Engine for Complex / Unknown Meals</label>
+        <select id="aiProvider" onchange="saveProfile()">
+          <option value="gemini">Google Gemini (models/gemini-3.5-flash-lite — Free Tier)</option>
+          <option value="openai">OpenAI ChatGPT (gpt-4o-mini — Fast &amp; Zero Free-Tier Spikes)</option>
+        </select>
+      </div>
+
+      <div id="geminiConfigBox" style="display:grid; grid-template-columns: 1.4fr 1fr; gap:8px;">
         <div>
           <label>Google Gemini API Key</label>
           <input type="password" id="geminiKey" placeholder="Paste AQ.Ab... or AIzaSy... key" onchange="saveProfile()">
         </div>
         <div>
-          <label>Active Gemini Model</label>
+          <label>Gemini Model</label>
           <div style="display:flex; gap:6px;">
             <input type="text" id="geminiModel" value="models/gemini-3.5-flash-lite" onchange="saveProfile()">
-            <button class="btn btn-primary btn-sm" onclick="testGeminiKey()">Test</button>
+            <button class="btn btn-primary btn-sm" onclick="testAIKey()">Test</button>
           </div>
         </div>
       </div>
-      <div id="keyStatus" style="font-size:0.75rem; color:var(--muted); margin-top:6px;">Uses <code>models/gemini-3.5-flash-lite</code> &amp; <code>models/gemini-3.8-flash</code> with complete JSON output.</div>
+
+      <div id="openaiConfigBox" style="display:none; grid-template-columns: 1fr auto; gap:8px; align-items:end;">
+        <div>
+          <label>OpenAI API Key (Starts with sk-... from platform.openai.com)</label>
+          <input type="password" id="openaiKey" placeholder="Paste sk-... key here" onchange="saveProfile()">
+        </div>
+        <button class="btn btn-primary btn-sm" style="height:40px;" onclick="testAIKey()">Test OpenAI</button>
+      </div>
+
+      <div id="keyStatus" style="font-size:0.75rem; color:var(--muted); margin-top:6px;">Parentheses like <code>1 bowl (rice + lentil porridge)</code> are now kept together automatically!</div>
     </div>
   </div>
 
@@ -463,12 +497,12 @@
   </nav>
 
 <script>
-const STORAGE_KEY = "jaspreet_ai_tracker_v16";
+const STORAGE_KEY = "jaspreet_ai_tracker_v17";
 
 const TIPS = {
   balance: {
     title: "Today's Balance Rings",
-    text: "The left ring shows your remaining calories for today. Stay inside the ring to lose ~0.55 kg/week.\n\nThe right ring tracks your 160g daily protein floor so you lose fat instead of muscle.\n\nTap '🔄 Fix Today's Math' anytime to re-calculate all items logged today using the updated nutrition engine."
+    text: "The left ring shows your remaining calories for today. Stay inside the ring to lose ~0.55 kg/week.\n\nThe right ring tracks your 160g daily protein floor so you lose fat instead of muscle.\n\nTap '🔄 Fix Today's Math' to clean up broken split rows like '1 bowl (rice' and 'lentil porridge)' and recalculate today's items accurately."
   },
   base: {
     title: "Base Burn (2208 kcal)",
@@ -496,7 +530,7 @@ const TIPS = {
   },
   gymfuel: {
     title: "Gym Fuel Stack (161 kcal | 26g P)",
-    text: "Logs your exact pre/post gym routine in 1 tap (and prevents duplicates if you tap it twice):\n• 1/4 Banana (26 kcal)\n• 2 Espresso shots w/ drops of milk (20 kcal)\n• 1 Scoop Whey Isolate in 500ml water (115 kcal, 25g P)"
+    text: "Logs your exact pre/post gym routine in 1 tap:\n• 1/4 Banana (26 kcal)\n• 2 Espresso shots w/ drops of milk (20 kcal)\n• 1 Scoop Whey Isolate in 500ml water (115 kcal, 25g P)"
   },
   duration: {
     title: "Workout Duration (Mins)",
@@ -520,11 +554,15 @@ const TIPS = {
   },
   csvexport: {
     title: "Where Data Is Stored & CSV Export",
-    text: "• Local Storage: Saved inside your browser on this device under key 'jaspreet_ai_tracker_v16'.\n• Cloud Storage: Synced live to your Firebase Realtime Database.\n• CSV Export: Generates a complete spreadsheet of all logged days (every meal item, workout, scale weight, and daily deficit summary) that you can attach in chat for review."
+    text: "• Local Storage: Saved inside your browser on this device under key 'jaspreet_ai_tracker_v17'.\n• Cloud Storage: Synced live to your Firebase Realtime Database.\n• CSV Export: Generates a complete spreadsheet of all logged days that you can attach in chat for review."
+  },
+  aiprovider: {
+    title: "Gemini vs OpenAI (ChatGPT) vs Claude",
+    text: "• Google Gemini (gemini-3.5-flash-lite): Free tier via Google AI Studio.\n• OpenAI ChatGPT (gpt-4o-mini): Super fast (~0.8s) and never has free-tier server spikes. Requires an OpenAI API key from platform.openai.com.\n• Note on Claude: Anthropic blocks direct browser calls via CORS unless proxied through a backend server."
   },
   buttons: {
     title: "How + Add vs ✨ AI Works",
-    text: "• + Add: Instantly calculates any food in the expanded Indian/Canadian dictionary. If you type an unknown dish, it automatically asks Gemini AI and saves that dish to your custom dictionary for next time!\n\n• ✨ AI: Directly asks Gemini AI to estimate complex restaurant meals.\n\n• Manual: Enter exact numbers from a package label."
+    text: "• + Add: Understands parentheses like '1 bowl (rice + lentil porridge)' without splitting them apart! Uses the built-in Indian/Canadian food dictionary, and automatically routes complex/composite dishes to AI with a 'Working on it...' popup.\n\n• ✨ AI: Directly asks Gemini or OpenAI to estimate any dish.\n\n• Manual: Enter exact numbers from a package label."
   },
   prepost: { title: "Pre & Post-Gym Fuel", text: "1/4 banana + 2 espresso shots pre-gym, and 1 scoop whey isolate in 500ml water post-gym." },
   breakfast: { title: "Breakfast", text: "Pair your vermicelli, poha, idli, uttapam, or avocado toast with 150g 1% cottage cheese or extra egg whites to hit 25g+ protein." },
@@ -536,7 +574,7 @@ const TIPS = {
 
 const MOTIVATION_TIPS = [
   "💡 Swap Idea: Replace 1 evening atta pinni (165 kcal, 3g P) with 150g 1% Cottage Cheese + chaat masala (123 kcal, 18g P). Saves 42 kcal and triples protein!",
-  "💡 Soya Chaap vs Soya Chunks: 2 pieces of Soya Chaap (made with maida) only have 6g protein, while 50g dry Soya Chunks have 26g pure protein!",
+  "💡 Khichdi / Porridge Tip: 1 bowl of rice + lentil porridge (khichdi) has ~215 kcal and 7.5g protein. Pair it with 150g 1% cottage cheese or curd to make it a 25g+ protein meal!",
   "💡 Craving Buster: Blending 1 scoop Whey Isolate with ice, 1 espresso shot, and water makes a 125-kcal iced protein latte with 25g protein.",
   "💡 Crunch Swap: Top 1 roasted papad with chopped onion, tomato & 100g 1% cottage cheese (135 kcal, 15g P) instead of fafda or rusk."
 ];
@@ -587,7 +625,7 @@ const MEAL_SLOTS = [
     icon: "🍲",
     name: "Dinner (No-Roti)",
     proChips: ["200g 1% cottage cheese + 1 bowl green salad", "1 scoop whey isolate + 150g 1% cottage cheese", "5 egg whites bhurji + 1 bowl clear soup", "50g soya chunks stir fry", "200g chicken breast curry"],
-    stapleChips: ["2 bowls black chickpea soup", "3 idli + 1 bowl sambar", "1 bowl mixed veg sabzi", "1 bowl dal"]
+    stapleChips: ["1 bowl (rice + lentil porridge)", "2 bowls black chickpea soup", "3 idli + 1 bowl sambar", "1 bowl mixed veg sabzi", "1 cup milk"]
   }
 ];
 
@@ -604,7 +642,14 @@ const COACH_DINNER_PRESETS = [
   ]
 ];
 
+// Expanded Dictionary: Composite dishes (Khichdi / Rice+Lentil Porridge) placed ABOVE single ingredients so they match first!
 const FOOD_LIBRARY = [
+  // Composite Porridges, Khichdi & Milk (MUST be checked before plain 'rice' or 'dal')
+  { match: /\b(khichdi|khichri|porridge|rice.*lentil|lentil.*rice|dal.*khichdi|moong.*rice)\b/, name: "Rice & Lentil Porridge / Khichdi (1 bowl)", kcal: 215, p: 7.5, c: 36, f: 4, kcalPer100g: 108, pPer100g: 3.8, cPer100g: 18, fPer100g: 2 },
+  { match: /\b(almond.*milk|cashew.*milk)\b/, name: "Unsweetened Almond/Cashew Milk (1 cup)", kcal: 35, p: 1, c: 1, f: 2.5, kcalPer100g: 15, pPer100g: 0.4, cPer100g: 0.4, fPer100g: 1.1 },
+  { match: /\b(cup.*milk|glass.*milk|2%.*milk|dairy.*milk|^1\s*milk|\bmilk\b)\b/, name: "2% Milk (1 cup / 250ml)", kcal: 125, p: 8.2, c: 12, f: 4.8, kcalPer100g: 50, pPer100g: 3.3, cPer100g: 4.8, fPer100g: 2 },
+
+  // Pre/Post Gym & Coffee
   { match: /\b(espresso|black coffee)\b/, name: "Espresso Shot (w/ drops of milk)", kcal: 10, p: 0.5, c: 1, f: 0.4, kcalPer100g: 30, pPer100g: 1.5, cPer100g: 3, fPer100g: 1 },
   { match: /\b(whey isolate|whey protein|whey|protein scoop)\b/, name: "Whey Protein Isolate (1 scoop)", kcal: 115, p: 25, c: 1.5, f: 0.5, kcalPer100g: 370, pPer100g: 82, cPer100g: 5, fPer100g: 1.5 },
   { match: /\b(egg white|white egg|egg whites|white eggs)\b/, name: "Egg White", kcal: 17, p: 3.6, c: 0.2, f: 0, kcalPer100g: 52, pPer100g: 11, cPer100g: 0.7, fPer100g: 0.2 },
@@ -683,7 +728,7 @@ function addDaysISO(dateStr, offset) {
 let state = {
   updatedAt: 0,
   theme: "light",
-  openSlotId: "lunch",
+  openSlotId: "dinner",
   profile: {
     weight: 90,
     targetWeight: 85,
@@ -691,16 +736,29 @@ let state = {
     age: 38,
     deficit: 600,
     proteinGoal: 160,
+    aiProvider: "gemini",
     geminiKey: "",
     geminiModel: "models/gemini-3.5-flash-lite",
+    openaiKey: "",
     fbUrl: "",
     fbUserKey: "jp_tracker_88"
   },
   currentDate: getTodayLocalISO(),
   weighIns: {},
-  customFoods: {}, // Caches AI-resolved foods so you never wait twice for the same item
+  customFoods: {},
   days: {}
 };
+
+// Working On It Popup Helpers
+function showWorking(title, sub) {
+  document.getElementById("workingTitle").textContent = title || "Working on it...";
+  document.getElementById("workingSub").textContent = sub || "Calculating macros & syncing with your database";
+  document.getElementById("workingModal").style.display = "flex";
+}
+
+function hideWorking() {
+  document.getElementById("workingModal").style.display = "none";
+}
 
 function showTip(key) {
   const item = TIPS[key] || { title: "Info", text: "" };
@@ -755,7 +813,7 @@ function pickDefaultOpenSlot() {
 }
 
 async function loadState() {
-  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v15", "jaspreet_ai_tracker_v14", "jaspreet_ai_tracker_v13", "jaspreet_ai_tracker_v12"];
+  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v16", "jaspreet_ai_tracker_v15", "jaspreet_ai_tracker_v14", "jaspreet_ai_tracker_v13"];
   for (let i = 0; i < keys.length; i++) {
     const raw = localStorage.getItem(keys[i]);
     if (raw) {
@@ -771,7 +829,6 @@ async function loadState() {
     }
   }
 
-  // Upgrade any retired 2.5 or invalid 3.8-flash-lite model name automatically
   if (!state.profile.geminiModel || state.profile.geminiModel.indexOf("2.5") !== -1 || state.profile.geminiModel.indexOf("3.8-flash-lite") !== -1) {
     state.profile.geminiModel = "models/gemini-3.5-flash-lite";
   }
@@ -804,9 +861,7 @@ function saveState(slotIdForFeedback) {
   }
 }
 
-// ==========================================
-// COMPREHENSIVE CSV AUDIT GENERATOR & EXPORT
-// ==========================================
+// CSV Export Functions
 function csvEscape(val) {
   const str = String(val === undefined || val === null ? "" : val);
   if (str.indexOf(",") !== -1 || str.indexOf("\"") !== -1 || str.indexOf("\n") !== -1) {
@@ -817,25 +872,11 @@ function csvEscape(val) {
 
 function buildFullAuditCSV() {
   const headers = [
-    "Date",
-    "Day",
-    "Record_Type",
-    "Slot_Or_Period",
-    "Item_Or_Workout_Name",
-    "Calories_Kcal",
-    "Protein_g",
-    "Carbs_g",
-    "Fat_g",
-    "Workout_Duration_Mins",
-    "Workout_Burn_Kcal",
-    "Scale_Weight_Kg",
-    "Day_Base_Burn_Kcal",
-    "Day_Total_Workout_Burn_Kcal",
-    "Day_Allowed_Target_Kcal",
-    "Day_Total_Eaten_Kcal",
-    "Day_Remaining_Or_Over_Kcal",
-    "Day_Net_Deficit_Vs_Maintenance_Kcal",
-    "Day_Completeness_Status"
+    "Date", "Day", "Record_Type", "Slot_Or_Period", "Item_Or_Workout_Name",
+    "Calories_Kcal", "Protein_g", "Carbs_g", "Fat_g", "Workout_Duration_Mins",
+    "Workout_Burn_Kcal", "Scale_Weight_Kg", "Day_Base_Burn_Kcal", "Day_Total_Workout_Burn_Kcal",
+    "Day_Allowed_Target_Kcal", "Day_Total_Eaten_Kcal", "Day_Remaining_Or_Over_Kcal",
+    "Day_Net_Deficit_Vs_Maintenance_Kcal", "Day_Completeness_Status"
   ];
 
   const rows = [headers.join(",")];
@@ -900,16 +941,10 @@ async function exportCSVFile() {
   try {
     const file = new File([csvContent], fileName, { type: "text/csv;charset=utf-8;" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        title: "Calorie & Macro Audit CSV",
-        text: "Daily & Weekly Calorie Tracker Export",
-        files: [file]
-      });
+      await navigator.share({ title: "Calorie & Macro Audit CSV", files: [file] });
       return;
     }
-  } catch (err) {
-    console.warn("Share sheet skipped, falling back to download:", err);
-  }
+  } catch (err) { console.warn(err); }
 
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -927,9 +962,7 @@ function copyCSVToClipboard() {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(csvContent).then(function() {
       alert("Full CSV table copied to your clipboard! Paste it directly into the chat for review.");
-    }).catch(function() {
-      prompt("Copy this CSV text:", csvContent);
-    });
+    }).catch(function() { prompt("Copy this CSV text:", csvContent); });
   } else {
     prompt("Copy this CSV text:", csvContent);
   }
@@ -996,12 +1029,18 @@ function syncProfileInputs() {
   document.getElementById("age").value = state.profile.age;
   document.getElementById("deficit").value = state.profile.deficit;
   document.getElementById("proteinGoal").value = state.profile.proteinGoal;
+  document.getElementById("aiProvider").value = state.profile.aiProvider || "gemini";
   document.getElementById("geminiKey").value = state.profile.geminiKey || "";
   document.getElementById("geminiModel").value = state.profile.geminiModel || "models/gemini-3.5-flash-lite";
+  document.getElementById("openaiKey").value = state.profile.openaiKey || "";
   document.getElementById("fbUrl").value = state.profile.fbUrl || "";
   document.getElementById("fbUserKey").value = state.profile.fbUserKey || "jp_tracker_88";
   document.getElementById("currentDate").value = state.currentDate;
   document.getElementById("todayScaleInput").value = state.weighIns[state.currentDate] || "";
+
+  const isOpenAI = state.profile.aiProvider === "openai";
+  document.getElementById("geminiConfigBox").style.display = isOpenAI ? "none" : "grid";
+  document.getElementById("openaiConfigBox").style.display = isOpenAI ? "grid" : "none";
 }
 
 function saveProfile() {
@@ -1011,12 +1050,16 @@ function saveProfile() {
   state.profile.age = parseFloat(document.getElementById("age").value) || 38;
   state.profile.deficit = parseFloat(document.getElementById("deficit").value) || 600;
   state.profile.proteinGoal = parseFloat(document.getElementById("proteinGoal").value) || 160;
+  state.profile.aiProvider = document.getElementById("aiProvider").value || "gemini";
   state.profile.geminiKey = document.getElementById("geminiKey").value.trim();
   let m = document.getElementById("geminiModel").value.trim() || "models/gemini-3.5-flash-lite";
   if (m.indexOf("models/") !== 0) m = "models/" + m;
   state.profile.geminiModel = m;
+  state.profile.openaiKey = document.getElementById("openaiKey").value.trim();
   state.profile.fbUrl = document.getElementById("fbUrl").value.trim().replace(/\/+$/, "");
   state.profile.fbUserKey = document.getElementById("fbUserKey").value.trim() || "jp_tracker_88";
+
+  syncProfileInputs();
   saveState();
   calcVisualBurn();
   renderAll();
@@ -1047,6 +1090,7 @@ async function pushToCloud(showAlert) {
   const url = getFirebaseEndpoint();
   const badge = document.getElementById("syncBadge");
   if (!url) return;
+  if (showAlert) showWorking("Saving to Firebase...", "Uploading your latest meals & workouts");
   try {
     badge.textContent = "☁️ Saving...";
     const payload = {
@@ -1065,8 +1109,9 @@ async function pushToCloud(showAlert) {
     if (!res.ok) throw new Error("HTTP " + res.status);
     badge.textContent = "☁️ Synced";
     badge.style.color = "var(--success)";
-    if (showAlert) alert("Saved to Firebase Cloud!");
+    if (showAlert) { hideWorking(); alert("Saved to Firebase Cloud!"); }
   } catch (e) {
+    if (showAlert) hideWorking();
     badge.textContent = "⚠️ Sync Error";
     badge.style.color = "var(--danger)";
   }
@@ -1076,6 +1121,7 @@ async function pullFromCloud(showAlert) {
   const url = getFirebaseEndpoint();
   const badge = document.getElementById("syncBadge");
   if (!url) return;
+  if (showAlert) showWorking("Loading from Firebase...", "Fetching your latest cloud data");
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1088,9 +1134,11 @@ async function pullFromCloud(showAlert) {
         state.weighIns = data.weighIns || state.weighIns || {};
         state.customFoods = Object.assign({}, state.customFoods || {}, data.customFoods || {});
         if (data.profile) {
-          const localKey = state.profile.geminiKey;
+          const localGKey = state.profile.geminiKey;
+          const localOKey = state.profile.openaiKey;
           state.profile = Object.assign({}, state.profile, data.profile);
-          if (!state.profile.geminiKey && localKey) state.profile.geminiKey = localKey;
+          if (!state.profile.geminiKey && localGKey) state.profile.geminiKey = localGKey;
+          if (!state.profile.openaiKey && localOKey) state.profile.openaiKey = localOKey;
         }
         state.currentDate = activeDate;
         ensureDay(state.currentDate);
@@ -1100,9 +1148,14 @@ async function pullFromCloud(showAlert) {
       }
       badge.textContent = "☁️ Synced";
       badge.style.color = "var(--success)";
-      if (showAlert) alert("Loaded latest data from Firebase!");
+      if (showAlert) { hideWorking(); alert("Loaded latest data from Firebase!"); }
+    } else if (showAlert) {
+      hideWorking();
     }
-  } catch (e) { console.warn(e); }
+  } catch (e) {
+    if (showAlert) hideWorking();
+    console.warn(e);
+  }
 }
 
 function switchDate(newDate) {
@@ -1218,7 +1271,6 @@ function logGymFuelStack() {
   renderAll();
 }
 
-// Safe JSON Parser that repairs truncated strings or extracts valid objects
 function safeParseAIJSON(rawText, fallbackName) {
   let cleaned = (rawText || "").replace(/```json|```/gi, "").trim();
   const s = cleaned.indexOf("[");
@@ -1227,9 +1279,9 @@ function safeParseAIJSON(rawText, fallbackName) {
     cleaned = cleaned.slice(s, e + 1);
   }
   try {
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+    return Array.isArray(parsed) ? parsed : (parsed.items || [parsed]);
   } catch (err) {
-    // Regex extraction fallback if a string was ever cut off
     const kcalM = cleaned.match(/"kcal"\s*:\s*(\d+(?:\.\d+)?)/i);
     const pM = cleaned.match(/"p"\s*:\s*(\d+(?:\.\d+)?)/i);
     const cM = cleaned.match(/"c"\s*:\s*(\d+(?:\.\d+)?)/i);
@@ -1238,8 +1290,8 @@ function safeParseAIJSON(rawText, fallbackName) {
       return [{
         name: fallbackName,
         kcal: Math.round(parseFloat(kcalM[1])),
-        p: pM ? Math.round(parseFloat(pM[1]) * 10) / 10 : 4,
-        c: cM ? Math.round(parseFloat(cM[1])) : 15,
+        p: pM ? Math.round(parseFloat(pM[1]) * 10) / 10 : 5,
+        c: cM ? Math.round(parseFloat(cM[1])) : 20,
         f: fM ? Math.round(parseFloat(fM[1])) : 5
       }];
     }
@@ -1247,8 +1299,41 @@ function safeParseAIJSON(rawText, fallbackName) {
   }
 }
 
-// Fixed Gemini API Caller: Uses gemini-3.5-flash-lite & gemini-3.8-flash without token truncation
-async function callGeminiFast(apiKey, query) {
+// Unified AI Caller: Supports both OpenAI (gpt-4o-mini) and Google Gemini (gemini-3.5-flash-lite)
+async function callAIProvider(query) {
+  const prompt = "You are an expert Indian and Western nutritionist. Estimate realistic calories and macros in grams for: \"" + query + "\". Keep composite dishes like '1 bowl (rice + lentil porridge)' together as a single dish (khichdi/porridge ~215 kcal, 7.5g P). Return ONLY a valid JSON array: [{\"name\":\"" + query.replace(/"/g, "") + "\",\"kcal\":215,\"p\":7.5,\"c\":36,\"f\":4}]";
+
+  if (state.profile.aiProvider === "openai") {
+    const oKey = state.profile.openaiKey;
+    if (!oKey || oKey.length < 15) throw new Error("Please paste your OpenAI API key in ⚙️ Setup.");
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + oKey
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.1,
+        messages: [
+          { role: "system", content: "You output only raw JSON arrays of nutrition objects." },
+          { role: "user", content: prompt }
+        ]
+      })
+    });
+    if (!res.ok) {
+      const errObj = await res.json().catch(function() { return {}; });
+      throw new Error((errObj && errObj.error && errObj.error.message) || ("OpenAI HTTP " + res.status));
+    }
+    const data = await res.json();
+    const raw = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || "[]";
+    return safeParseAIJSON(raw, query);
+  }
+
+  // Default: Google Gemini
+  const apiKey = state.profile.geminiKey;
+  if (!apiKey || apiKey.length < 15) throw new Error("Please paste your Gemini API key in ⚙️ Setup.");
+
   const userModel = state.profile.geminiModel || "models/gemini-3.5-flash-lite";
   const candidates = [
     userModel,
@@ -1256,9 +1341,7 @@ async function callGeminiFast(apiKey, query) {
     "models/gemini-3.8-flash"
   ].filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });
 
-  const prompt = "Indian nutritionist: estimate calories and macros in grams for \"" + query + "\". Return ONLY a JSON array: [{\"name\":\"" + query.replace(/"/g, "") + "\",\"kcal\":150,\"p\":6,\"c\":20,\"f\":5}]";
   let lastErr = "";
-
   for (let i = 0; i < candidates.length; i++) {
     const modelName = candidates[i];
     const url = "https://generativelanguage.googleapis.com/v1beta/" + modelName + ":generateContent?key=" + encodeURIComponent(apiKey);
@@ -1268,10 +1351,7 @@ async function callGeminiFast(apiKey, query) {
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: "application/json"
-          }
+          generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
         })
       });
 
@@ -1288,7 +1368,6 @@ async function callGeminiFast(apiKey, query) {
       } else {
         const errObj = await res.json().catch(function() { return {}; });
         lastErr = (errObj && errObj.error && errObj.error.message) || ("HTTP " + res.status);
-        // If Google's error message names a replacement model (like models/gemini-3.5-flash-lite), add it to candidates immediately
         const suggested = lastErr.match(/models\/gemini-[a-z0-9.-]+/i);
         if (suggested && candidates.indexOf(suggested[0]) === -1) {
           candidates.push(suggested[0]);
@@ -1298,21 +1377,21 @@ async function callGeminiFast(apiKey, query) {
       lastErr = netErr.message;
     }
   }
-  throw new Error(lastErr || "Could not reach Gemini AI.");
+  throw new Error(lastErr || "Could not reach AI provider.");
 }
 
-async function testGeminiKey() {
+async function testAIKey() {
   saveProfile();
   const statusEl = document.getElementById("keyStatus");
-  const key = state.profile.geminiKey;
-  if (!key || key.length < 15) { statusEl.textContent = "Paste full key first"; return; }
-  statusEl.textContent = "Testing connection...";
+  showWorking("Testing AI Connection...", "Verifying your API key & model");
   try {
-    const items = await callGeminiFast(key, "1 bowl mix veg raita");
+    const items = await callAIProvider("1 bowl (rice + lentil porridge)");
+    hideWorking();
     statusEl.style.color = "var(--success)";
-    statusEl.textContent = "✓ Connected via " + state.profile.geminiModel + " (" + (items[0] ? items[0].kcal : 110) + " kcal)";
+    statusEl.textContent = "✓ Connected! Parsed '" + (items[0] ? items[0].name : "Porridge") + "' = " + (items[0] ? items[0].kcal : 215) + " kcal, " + (items[0] ? items[0].p : 7.5) + "g P";
     saveState();
   } catch (e) {
+    hideWorking();
     statusEl.style.color = "var(--danger)";
     statusEl.textContent = "Error: " + e.message;
   }
@@ -1339,10 +1418,53 @@ function extractQuantityAndGrams(str) {
   return { grams: null, qty: 1 };
 }
 
+// Parentheses-aware splitter: NEVER splits on '+', ',', or 'and' when inside (...)!
+function splitOutsideParentheses(str) {
+  const result = [];
+  let current = "";
+  let depth = 0;
+  let i = 0;
+
+  while (i < str.length) {
+    const ch = str[i];
+    if (ch === "(") {
+      depth++;
+      current += ch;
+      i++;
+      continue;
+    }
+    if (ch === ")") {
+      depth = Math.max(0, depth - 1);
+      current += ch;
+      i++;
+      continue;
+    }
+    if (depth === 0) {
+      if (ch === "+" || ch === ",") {
+        if (current.trim()) result.push(current.trim());
+        current = "";
+        i++;
+        continue;
+      }
+      const rest = str.slice(i);
+      const andMatch = rest.match(/^(\s+\band\b\s+)/i);
+      if (andMatch) {
+        if (current.trim()) result.push(current.trim());
+        current = "";
+        i += andMatch[0].length;
+        continue;
+      }
+    }
+    current += ch;
+    i++;
+  }
+  if (current.trim()) result.push(current.trim());
+  return result;
+}
+
 function computeSingleFoodPart(cleanPart) {
   const lower = cleanPart.toLowerCase();
 
-  // Check previously AI-learned custom foods first
   if (state.customFoods && state.customFoods[lower]) {
     return Object.assign({}, state.customFoods[lower], { name: cleanPart });
   }
@@ -1353,7 +1475,10 @@ function computeSingleFoodPart(cleanPart) {
 
   let matched = null;
   for (let i = 0; i < FOOD_LIBRARY.length; i++) {
-    if (FOOD_LIBRARY[i].match.test(lower)) { matched = FOOD_LIBRARY[i]; break; }
+    if (FOOD_LIBRARY[i].match.test(lower)) {
+      matched = FOOD_LIBRARY[i];
+      break;
+    }
   }
   if (!matched) return null;
 
@@ -1379,29 +1504,41 @@ function computeSingleFoodPart(cleanPart) {
   }
 }
 
+// 1-Tap Fix: Cleans up broken '(rice' and 'lentil porridge)' rows & recalculates all items on the current day
 function recalculateTodayItems() {
-  ensureDay(state.currentDate);
-  const d = state.days[state.currentDate];
+  showWorking("Fixing Today's Math...", "Cleaning up split rows & recalculating macros");
+  setTimeout(function() {
+    ensureDay(state.currentDate);
+    const d = state.days[state.currentDate];
 
-  (d.morningActs || []).forEach(function(a) {
-    if (a.name.indexOf("Pickleball") !== -1 && a.kcal === 454) a.kcal = 340;
-    if (a.name.indexOf("Walk") !== -1 && a.kcal === 331) a.kcal = 236;
-  });
-  (d.eveningActs || []).forEach(function(a) {
-    if (a.name.indexOf("Pickleball") !== -1 && a.kcal === 454) a.kcal = 340;
-    if (a.name.indexOf("Walk") !== -1 && a.kcal === 331) a.kcal = 236;
-  });
-
-  Object.keys(d.meals).forEach(function(slotId) {
-    d.meals[slotId] = d.meals[slotId].map(function(item) {
-      const recalced = computeSingleFoodPart(item.name);
-      return recalced ? recalced : item;
+    (d.morningActs || []).forEach(function(a) {
+      if (a.name.indexOf("Pickleball") !== -1 && a.kcal === 454) a.kcal = 340;
+      if (a.name.indexOf("Walk") !== -1 && a.kcal === 331) a.kcal = 236;
     });
-  });
+    (d.eveningActs || []).forEach(function(a) {
+      if (a.name.indexOf("Pickleball") !== -1 && a.kcal === 454) a.kcal = 340;
+      if (a.name.indexOf("Walk") !== -1 && a.kcal === 331) a.kcal = 236;
+    });
 
-  saveState();
-  renderAll();
-  alert("Recalculated today's meals and net workout burn with accurate macros!");
+    Object.keys(d.meals).forEach(function(slotId) {
+      // Remove broken half-parenthesis fragments like "1 bowl (rice" or "lentil porridge)"
+      const cleanedList = d.meals[slotId].filter(function(item) {
+        const n = (item.name || "").trim();
+        if (n === "1 bowl (rice" || n === "lentil porridge)") return false;
+        return true;
+      });
+
+      d.meals[slotId] = cleanedList.map(function(item) {
+        const recalced = computeSingleFoodPart(item.name);
+        return recalced ? recalced : item;
+      });
+    });
+
+    saveState();
+    renderAll();
+    hideWorking();
+    alert("Fixed! Removed broken split rows and updated rice+lentil porridge (215 kcal, 7.5g P) & milk macros.");
+  }, 350);
 }
 
 async function parseFoodLocally(slotId, presetText) {
@@ -1409,11 +1546,8 @@ async function parseFoodLocally(slotId, presetText) {
   const query = (presetText || (inputEl ? inputEl.value : "")).trim();
   if (!query) return;
 
-  const normalized = query
-    .replace(/\bwith\s+(?=paneer|dal|sambar|sambhar|curd|dahi|chicken|soya|egg|roti|rice|chole|rajma)/gi, " + ")
-    .replace(/([a-zA-Z])\s*\/\s*([a-zA-Z])/g, "$1 + $2");
-
-  const parts = normalized.split(/\s*(?:\+|,|\band\b)\s*/i).filter(Boolean);
+  // Only replace 'with' or '/' when NOT inside parentheses
+  const parts = splitOutsideParentheses(query);
   const unknownParts = [];
 
   parts.forEach(function(part) {
@@ -1432,7 +1566,9 @@ async function parseFoodLocally(slotId, presetText) {
 
   if (unknownParts.length > 0) {
     const unknownQuery = unknownParts.join(" + ");
-    if (state.profile.geminiKey && state.profile.geminiKey.length >= 15) {
+    const hasKey = (state.profile.aiProvider === "openai" && state.profile.openaiKey.length >= 15) ||
+                   (state.profile.aiProvider !== "openai" && state.profile.geminiKey.length >= 15);
+    if (hasKey) {
       await parseFoodWithAI(slotId, unknownQuery);
       return;
     } else {
@@ -1452,15 +1588,11 @@ async function parseFoodWithAI(slotId, overrideQuery) {
   const query = (overrideQuery || (inputEl ? inputEl.value : "")).trim();
   if (!query) return;
 
-  const apiKey = state.profile.geminiKey;
-  if (!apiKey || apiKey.length < 15) {
-    alert("Paste your Gemini API key in ⚙️ Setup first.");
-    return;
-  }
-
   if (btnEl) { btnEl.disabled = true; btnEl.textContent = "⏳"; }
+  showWorking("Working on it...", "Asking AI to calculate macros for \"" + query + "\"");
+
   try {
-    const items = await callGeminiFast(apiKey, query);
+    const items = await callAIProvider(query);
     if (Array.isArray(items) && items.length > 0) {
       items.forEach(function(it) {
         const entry = {
@@ -1471,7 +1603,6 @@ async function parseFoodWithAI(slotId, overrideQuery) {
           f: Math.round(Number(it.f) || 0)
         };
         state.days[state.currentDate].meals[slotId].push(entry);
-        // Save into customFoods dictionary so next time it works in 0.01s offline!
         if (!state.customFoods) state.customFoods = {};
         state.customFoods[query.toLowerCase()] = entry;
       });
@@ -1481,12 +1612,12 @@ async function parseFoodWithAI(slotId, overrideQuery) {
       renderAll();
     }
   } catch (err) {
-    // If Google server is temporarily overloaded, open Manual row pre-filled so user is never blocked
     toggleManualRow(slotId);
     const mName = document.getElementById("m_name_" + slotId);
     if (mName) mName.value = query;
     alert("AI Note (" + err.message + "). Enter calories in the Manual box opened below.");
   } finally {
+    hideWorking();
     if (btnEl) { btnEl.disabled = false; btnEl.textContent = "✨ AI"; }
   }
 }
@@ -1819,7 +1950,7 @@ function renderAll() {
         '<div class="meal-body">' +
           '<div class="chip-scroll">' + proChipsHTML + stapleChipsHTML + '</div>' +
           '<div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">' +
-            '<input type="text" id="food_in_' + slot.id + '" style="flex:1; min-width:160px;" placeholder="Type food (e.g. 2 poori + 250g halwa)..." onkeydown="if(event.key===\'Enter\') parseFoodLocally(\'' + slot.id + '\')">' +
+            '<input type="text" id="food_in_' + slot.id + '" style="flex:1; min-width:160px;" placeholder="Type food (e.g. 1 bowl (rice + lentil porridge))..." onkeydown="if(event.key===\'Enter\') parseFoodLocally(\'' + slot.id + '\')">' +
             '<button class="btn btn-primary btn-sm" onclick="parseFoodLocally(\'' + slot.id + '\')">+ Add</button>' +
             '<button class="btn btn-ai btn-sm" id="ai_btn_' + slot.id + '" onclick="parseFoodWithAI(\'' + slot.id + '\')">✨ AI</button>' +
             '<button class="btn btn-sm" onclick="toggleManualRow(\'' + slot.id + '\')">Manual</button>' +
