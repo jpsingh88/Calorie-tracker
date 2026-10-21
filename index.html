@@ -392,7 +392,7 @@
         </span>
       </div>
       <p style="font-size:0.8rem; color:var(--muted); margin-bottom:12px; line-height:1.45;">
-        Your data is stored locally in your browser (<code>localStorage</code>) and synced to your Firebase Realtime Database (<code>/trackers/jp_tracker_88</code>). Export your full meal, workout, and daily deficit audit as a CSV file anytime to attach for review:
+        Your data is stored locally in your browser (<code>localStorage</code>) and synced to your Firebase Realtime Database. Export your full meal, workout, and daily deficit audit as a CSV file anytime to attach for review:
       </p>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <button class="btn btn-primary btn-sm" onclick="exportCSVFile()">📊 Download Audit .CSV File</button>
@@ -437,15 +437,20 @@
         <div><label>Height (cm)</label><input type="number" id="height" onchange="saveProfile()"></div>
         <div><label>Age</label><input type="number" id="age" onchange="saveProfile()"></div>
       </div>
-      <div>
-        <label>Google Gemini API Key (Auto-used when a food isn't in local dictionary)</label>
-        <div style="display:flex; gap:8px;">
+      <div style="display:grid; grid-template-columns: 1.4fr 1fr; gap:8px;">
+        <div>
+          <label>Google Gemini API Key</label>
           <input type="password" id="geminiKey" placeholder="Paste AQ.Ab... or AIzaSy... key" onchange="saveProfile()">
-          <button class="btn btn-primary btn-sm" onclick="testGeminiKey()">Test Key</button>
         </div>
-        <input type="hidden" id="geminiModel" value="models/gemini-3.8-flash-lite">
-        <div id="keyStatus" style="font-size:0.75rem; color:var(--muted); margin-top:6px;"></div>
+        <div>
+          <label>Active Gemini Model</label>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="geminiModel" value="models/gemini-3.5-flash-lite" onchange="saveProfile()">
+            <button class="btn btn-primary btn-sm" onclick="testGeminiKey()">Test</button>
+          </div>
+        </div>
       </div>
+      <div id="keyStatus" style="font-size:0.75rem; color:var(--muted); margin-top:6px;">Uses <code>models/gemini-3.5-flash-lite</code> &amp; <code>models/gemini-3.8-flash</code> with complete JSON output.</div>
     </div>
   </div>
 
@@ -458,7 +463,7 @@
   </nav>
 
 <script>
-const STORAGE_KEY = "jaspreet_ai_tracker_v15";
+const STORAGE_KEY = "jaspreet_ai_tracker_v16";
 
 const TIPS = {
   balance: {
@@ -515,11 +520,11 @@ const TIPS = {
   },
   csvexport: {
     title: "Where Data Is Stored & CSV Export",
-    text: "• Local Storage: Saved inside your browser on this device under key 'jaspreet_ai_tracker_v15'.\n• Cloud Storage: Synced live to your Firebase Realtime Database under '/trackers/jp_tracker_88.json'.\n• CSV Export: Generates a complete spreadsheet of all logged days (every meal item, workout, scale weight, and daily deficit summary) that you can attach in chat for review."
+    text: "• Local Storage: Saved inside your browser on this device under key 'jaspreet_ai_tracker_v16'.\n• Cloud Storage: Synced live to your Firebase Realtime Database.\n• CSV Export: Generates a complete spreadsheet of all logged days (every meal item, workout, scale weight, and daily deficit summary) that you can attach in chat for review."
   },
   buttons: {
     title: "How + Add vs ✨ AI Works",
-    text: "• + Add: Instantly calculates any food in the expanded Indian/Canadian dictionary (including grams like 250g halwa, 25g banana, 2 poori, 2 soya chaap). If you type an unknown dish, it automatically asks Gemini AI instead of guessing 110 kcal!\n\n• ✨ AI: Directly asks Gemini AI to estimate complex restaurant meals.\n\n• Manual: Enter exact numbers from a package label."
+    text: "• + Add: Instantly calculates any food in the expanded Indian/Canadian dictionary. If you type an unknown dish, it automatically asks Gemini AI and saves that dish to your custom dictionary for next time!\n\n• ✨ AI: Directly asks Gemini AI to estimate complex restaurant meals.\n\n• Manual: Enter exact numbers from a package label."
   },
   prepost: { title: "Pre & Post-Gym Fuel", text: "1/4 banana + 2 espresso shots pre-gym, and 1 scoop whey isolate in 500ml water post-gym." },
   breakfast: { title: "Breakfast", text: "Pair your vermicelli, poha, idli, uttapam, or avocado toast with 150g 1% cottage cheese or extra egg whites to hit 25g+ protein." },
@@ -607,7 +612,7 @@ const FOOD_LIBRARY = [
   { match: /\b(soya chaap|chaap)\b/, name: "Soya Chaap Piece", kcal: 55, p: 3.2, c: 6, f: 2, kcalPer100g: 185, pPer100g: 11, cPer100g: 20, fPer100g: 7 },
   { match: /\b(soya chunk|soya|nutrela)\b/, name: "Soya Chunks Stir-Fry (50g dry bowl)", kcal: 172, p: 26, c: 16, f: 0.5, kcalPer100g: 345, pPer100g: 52, cPer100g: 33, fPer100g: 1 },
   { match: /\b(poori|puri|bedmi)\b/, name: "Fried Poori", kcal: 130, p: 2.2, c: 16, f: 6.5, kcalPer100g: 360, pPer100g: 6, cPer100g: 45, fPer100g: 18 },
-  { match: /\b(halwa|sooji halwa|suji halwa|atta halwa|moong halwa|gajar halwa)\b/, name: "Indian Halwa (1 bowl / 100g)", kcal: 290, p: 3.5, c: 38, f: 14, kcalPer100g: 290, pPer100g: 3.5, cPer100g: 38, fPer100g: 14 },
+  { match: /\b(halwa|sooji halwa|suji halwa|atta halwa|moong halwa|gajar halwa|sheera)\b/, name: "Indian Halwa (1 bowl / 100g)", kcal: 290, p: 3.5, c: 38, f: 14, kcalPer100g: 290, pPer100g: 3.5, cPer100g: 38, fPer100g: 14 },
   { match: /\b(black chickpea soup|kala chana soup|chickpea soup|chana soup)\b/, name: "Black Chickpea Soup (1 bowl)", kcal: 140, p: 7.5, c: 22, f: 2.5, kcalPer100g: 70, pPer100g: 3.8, cPer100g: 11, fPer100g: 1.2 },
   { match: /\b(kala chana|black chana|black channe|kala channe|channe|chane|black chickpea)\b/, name: "Cooked Black Chana / Channe", kcal: 210, p: 11, c: 32, f: 4.5, kcalPer100g: 155, pPer100g: 8.5, cPer100g: 24, fPer100g: 3.2 },
   { match: /\b(manchurian|gobi manchurian|veg manchurian)\b/, name: "Veg Manchurian Ball (1 pc)", kcal: 65, p: 1.5, c: 7.5, f: 3.2, kcalPer100g: 215, pPer100g: 5, cPer100g: 25, fPer100g: 11 },
@@ -642,20 +647,20 @@ const FOOD_LIBRARY = [
   { match: /\b(clear soup|veg soup|broth)\b/, name: "Clear Vegetable Soup (1 bowl)", kcal: 55, p: 2, c: 10, f: 0.5, kcalPer100g: 28, pPer100g: 1, cPer100g: 5, fPer100g: 0.3 },
   { match: /\b(rajma|chole)\b/, name: "Rajma / Chole (1 bowl)", kcal: 220, p: 11, c: 32, f: 5, kcalPer100g: 110, pPer100g: 5.5, cPer100g: 16, fPer100g: 2.5 },
   { match: /\b(dal|daal|lentil)\b/, name: "Yellow / Masoor Dal (1 bowl)", kcal: 180, p: 9, c: 26, f: 4.5, kcalPer100g: 90, pPer100g: 4.5, cPer100g: 13, fPer100g: 2.2 },
-  { match: /\b(carrot.*pea.*potato|aloo.*gajar.*matar|potato.*sabji|potato.*sabzi|mixed.*sabzi|mixed.*sabji|sabzi|sabji|gobhi|bhindi)\b/, name: "Home Vegetable Sabzi (1 bowl)", kcal: 155, p: 3.5, c: 20, f: 6.5, kcalPer100g: 100, pPer100g: 2.2, cPer100g: 13, fPer100g: 4.2 },
-  { match: /\b(salad|cucumber)\b/, name: "Fresh Green Salad (1 bowl)", kcal: 45, p: 1.5, c: 9, f: 0.2, kcalPer100g: 25, pPer100g: 0.8, cPer100g: 5, fPer100g: 0.1 },
+  { match: /\b(carrot.*pea.*potato|aloo.*gajar.*matar|potato.*sabji|potato.*sabzi|mixed.*sabzi|mixed.*sabji|sabzi|sabji|gobhi|bhindi|baingan|palak|methi)\b/, name: "Home Vegetable Sabzi (1 bowl)", kcal: 155, p: 3.5, c: 20, f: 6.5, kcalPer100g: 100, pPer100g: 2.2, cPer100g: 13, fPer100g: 4.2 },
+  { match: /\b(salad|cucumber|kachumber)\b/, name: "Fresh Green Salad (1 bowl)", kcal: 45, p: 1.5, c: 9, f: 0.2, kcalPer100g: 25, pPer100g: 0.8, cPer100g: 5, fPer100g: 0.1 },
   { match: /\b(peanut butter)\b/, name: "Peanut Butter (1 tbsp)", kcal: 95, p: 4, c: 3, f: 8, kcalPer100g: 588, pPer100g: 25, cPer100g: 20, fPer100g: 50 },
   { match: /\b(peanut|peanuts)\b/, name: "Roasted Peanuts (25g)", kcal: 145, p: 6.5, c: 4, f: 12.5, kcalPer100g: 580, pPer100g: 26, cPer100g: 16, fPer100g: 50 },
-  { match: /\b(almond|walnut|cashew|nuts)\b/, name: "Mixed Nuts (20g)", kcal: 120, p: 4, c: 3, f: 11, kcalPer100g: 600, pPer100g: 20, cPer100g: 15, fPer100g: 55 },
+  { match: /\b(almond|walnut|cashew|pistachio|nuts)\b/, name: "Mixed Nuts (20g)", kcal: 120, p: 4, c: 3, f: 11, kcalPer100g: 600, pPer100g: 20, cPer100g: 15, fPer100g: 55 },
   { match: /\b(chai|tea)\b/, name: "Indian Milk Tea / Chai", kcal: 70, p: 2.5, c: 9, f: 2.5, kcalPer100g: 45, pPer100g: 1.6, cPer100g: 6, fPer100g: 1.6 },
-  { match: /\b(pinni|laddu)\b/, name: "Pinni / Laddu (1 pc)", kcal: 165, p: 3, c: 18, f: 9, kcalPer100g: 440, pPer100g: 8, cPer100g: 48, fPer100g: 24 },
+  { match: /\b(pinni|laddu|laddoo|barfi|burfi|gulab jamun|jalebi)\b/, name: "Indian Sweet / Pinni (1 pc)", kcal: 165, p: 3, c: 18, f: 9, kcalPer100g: 440, pPer100g: 8, cPer100g: 48, fPer100g: 24 },
   { match: /\b(rusk)\b/, name: "Tea Rusk (1 pc)", kcal: 45, p: 1.2, c: 8, f: 1, kcalPer100g: 410, pPer100g: 11, cPer100g: 72, fPer100g: 9 },
   { match: /\b(makhana)\b/, name: "Roasted Makhana (30g bowl)", kcal: 110, p: 3, c: 22, f: 1, kcalPer100g: 350, pPer100g: 9.7, cPer100g: 76, fPer100g: 0.5 },
-  { match: /\b(cake)\b/, name: "Cake (1 spoon)", kcal: 45, p: 0.5, c: 6, f: 2, kcalPer100g: 370, pPer100g: 4, cPer100g: 50, fPer100g: 16 },
+  { match: /\b(cake|pastry|brownie)\b/, name: "Cake (1 spoon / small slice)", kcal: 45, p: 0.5, c: 6, f: 2, kcalPer100g: 370, pPer100g: 4, cPer100g: 50, fPer100g: 16 },
   { match: /\b(banana)\b/, name: "Banana", kcal: 105, p: 1.3, c: 27, f: 0.4, kcalPer100g: 89, pPer100g: 1.1, cPer100g: 23, fPer100g: 0.3 },
-  { match: /\b(apple|pear)\b/, name: "Medium Apple", kcal: 95, p: 0.5, c: 25, f: 0.3, kcalPer100g: 52, pPer100g: 0.3, cPer100g: 14, fPer100g: 0.2 },
-  { match: /\b(orange)\b/, name: "Medium Orange", kcal: 85, p: 1.5, c: 21, f: 0.2, kcalPer100g: 47, pPer100g: 0.9, cPer100g: 12, fPer100g: 0.1 },
-  { match: /\b(berries|strawberry|blueberry)\b/, name: "Mixed Berries", kcal: 75, p: 1, c: 17, f: 0.4, kcalPer100g: 50, pPer100g: 0.7, cPer100g: 11, fPer100g: 0.3 }
+  { match: /\b(apple|pear|guava|pomegranate|papaya|mango|watermelon)\b/, name: "Fresh Fruit Portion", kcal: 95, p: 0.8, c: 24, f: 0.3, kcalPer100g: 55, pPer100g: 0.5, cPer100g: 14, fPer100g: 0.2 },
+  { match: /\b(orange|clementine|mandarin|kiwi)\b/, name: "Citrus / Medium Fruit", kcal: 85, p: 1.5, c: 21, f: 0.2, kcalPer100g: 47, pPer100g: 0.9, cPer100g: 12, fPer100g: 0.1 },
+  { match: /\b(berries|strawberry|blueberry|raspberry)\b/, name: "Mixed Berries", kcal: 75, p: 1, c: 17, f: 0.4, kcalPer100g: 50, pPer100g: 0.7, cPer100g: 11, fPer100g: 0.3 }
 ];
 
 const WORD_NUMS = {
@@ -687,12 +692,13 @@ let state = {
     deficit: 600,
     proteinGoal: 160,
     geminiKey: "",
-    geminiModel: "models/gemini-3.8-flash-lite",
+    geminiModel: "models/gemini-3.5-flash-lite",
     fbUrl: "",
     fbUserKey: "jp_tracker_88"
   },
   currentDate: getTodayLocalISO(),
   weighIns: {},
+  customFoods: {}, // Caches AI-resolved foods so you never wait twice for the same item
   days: {}
 };
 
@@ -749,7 +755,7 @@ function pickDefaultOpenSlot() {
 }
 
 async function loadState() {
-  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v14", "jaspreet_ai_tracker_v13", "jaspreet_ai_tracker_v12", "jaspreet_ai_tracker_v11", "jaspreet_ai_tracker_v10"];
+  const keys = [STORAGE_KEY, "jaspreet_ai_tracker_v15", "jaspreet_ai_tracker_v14", "jaspreet_ai_tracker_v13", "jaspreet_ai_tracker_v12"];
   for (let i = 0; i < keys.length; i++) {
     const raw = localStorage.getItem(keys[i]);
     if (raw) {
@@ -757,12 +763,19 @@ async function loadState() {
         const parsed = JSON.parse(raw);
         state = Object.assign({}, state, parsed, {
           profile: Object.assign({}, state.profile, parsed.profile || {}),
-          weighIns: parsed.weighIns || {}
+          weighIns: parsed.weighIns || {},
+          customFoods: parsed.customFoods || {}
         });
         break;
       } catch (e) { console.error(e); }
     }
   }
+
+  // Upgrade any retired 2.5 or invalid 3.8-flash-lite model name automatically
+  if (!state.profile.geminiModel || state.profile.geminiModel.indexOf("2.5") !== -1 || state.profile.geminiModel.indexOf("3.8-flash-lite") !== -1) {
+    state.profile.geminiModel = "models/gemini-3.5-flash-lite";
+  }
+
   state.currentDate = getTodayLocalISO();
   state.openSlotId = pickDefaultOpenSlot();
 
@@ -834,7 +847,6 @@ function buildFullAuditCSV() {
     const st = evaluateDayStats(dateStr);
     const scaleWt = state.weighIns[dateStr] || "";
 
-    // Skip completely empty unlogged future/past shell days unless a weight was logged
     const totalActs = (d.morningActs ? d.morningActs.length : 0) + (d.eveningActs ? d.eveningActs.length : 0);
     if (st.eaten === 0 && totalActs === 0 && !scaleWt) return;
 
@@ -844,7 +856,6 @@ function buildFullAuditCSV() {
     const statusText = st.isComplete ? "Complete" : (st.isPartial ? "Incomplete (Partial)" : "Unlogged");
     const remOrOver = st.allowed - st.eaten;
 
-    // 1. Morning Workouts
     (d.morningActs || []).forEach(function(act) {
       rows.push([
         dateStr, dayName, "WORKOUT", "Morning Session", act.name,
@@ -853,7 +864,6 @@ function buildFullAuditCSV() {
       ].map(csvEscape).join(","));
     });
 
-    // 2. Evening Workouts
     (d.eveningActs || []).forEach(function(act) {
       rows.push([
         dateStr, dayName, "WORKOUT", "Evening Session", act.name,
@@ -862,7 +872,6 @@ function buildFullAuditCSV() {
       ].map(csvEscape).join(","));
     });
 
-    // 3. All 6 Meal Slots
     MEAL_SLOTS.forEach(function(slot) {
       const items = (d.meals && d.meals[slot.id]) || [];
       items.forEach(function(it) {
@@ -874,7 +883,6 @@ function buildFullAuditCSV() {
       });
     });
 
-    // 4. Daily Rollup Summary Row
     rows.push([
       dateStr, dayName, "DAILY_SUMMARY", "All Day Total", "Total Eaten: " + st.eaten + " kcal | Protein: " + st.pro + "g",
       st.eaten, st.pro, st.carbs, st.fats, "", st.workoutBurn, scaleWt,
@@ -889,7 +897,6 @@ async function exportCSVFile() {
   const csvContent = buildFullAuditCSV();
   const fileName = "jp_calorie_audit_" + getTodayLocalISO() + ".csv";
 
-  // Try native iOS Share Sheet with File support first if on iPhone
   try {
     const file = new File([csvContent], fileName, { type: "text/csv;charset=utf-8;" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -901,10 +908,9 @@ async function exportCSVFile() {
       return;
     }
   } catch (err) {
-    console.warn("Share sheet skipped or cancelled, falling back to direct download:", err);
+    console.warn("Share sheet skipped, falling back to download:", err);
   }
 
-  // Standard Browser Download (Laptop & iOS fallback)
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -920,7 +926,7 @@ function copyCSVToClipboard() {
   const csvContent = buildFullAuditCSV();
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(csvContent).then(function() {
-      alert("Full CSV table copied to your clipboard! You can now paste it directly into the Gemini chat for review.");
+      alert("Full CSV table copied to your clipboard! Paste it directly into the chat for review.");
     }).catch(function() {
       prompt("Copy this CSV text:", csvContent);
     });
@@ -991,6 +997,7 @@ function syncProfileInputs() {
   document.getElementById("deficit").value = state.profile.deficit;
   document.getElementById("proteinGoal").value = state.profile.proteinGoal;
   document.getElementById("geminiKey").value = state.profile.geminiKey || "";
+  document.getElementById("geminiModel").value = state.profile.geminiModel || "models/gemini-3.5-flash-lite";
   document.getElementById("fbUrl").value = state.profile.fbUrl || "";
   document.getElementById("fbUserKey").value = state.profile.fbUserKey || "jp_tracker_88";
   document.getElementById("currentDate").value = state.currentDate;
@@ -1005,6 +1012,9 @@ function saveProfile() {
   state.profile.deficit = parseFloat(document.getElementById("deficit").value) || 600;
   state.profile.proteinGoal = parseFloat(document.getElementById("proteinGoal").value) || 160;
   state.profile.geminiKey = document.getElementById("geminiKey").value.trim();
+  let m = document.getElementById("geminiModel").value.trim() || "models/gemini-3.5-flash-lite";
+  if (m.indexOf("models/") !== 0) m = "models/" + m;
+  state.profile.geminiModel = m;
   state.profile.fbUrl = document.getElementById("fbUrl").value.trim().replace(/\/+$/, "");
   state.profile.fbUserKey = document.getElementById("fbUserKey").value.trim() || "jp_tracker_88";
   saveState();
@@ -1044,6 +1054,7 @@ async function pushToCloud(showAlert) {
       theme: state.theme,
       profile: state.profile,
       weighIns: state.weighIns,
+      customFoods: state.customFoods,
       days: state.days
     };
     const res = await fetch(url, {
@@ -1075,6 +1086,7 @@ async function pullFromCloud(showAlert) {
         state.updatedAt = data.updatedAt || Date.now();
         state.days = data.days;
         state.weighIns = data.weighIns || state.weighIns || {};
+        state.customFoods = Object.assign({}, state.customFoods || {}, data.customFoods || {});
         if (data.profile) {
           const localKey = state.profile.geminiKey;
           state.profile = Object.assign({}, state.profile, data.profile);
@@ -1206,34 +1218,87 @@ function logGymFuelStack() {
   renderAll();
 }
 
+// Safe JSON Parser that repairs truncated strings or extracts valid objects
+function safeParseAIJSON(rawText, fallbackName) {
+  let cleaned = (rawText || "").replace(/```json|```/gi, "").trim();
+  const s = cleaned.indexOf("[");
+  const e = cleaned.lastIndexOf("]");
+  if (s !== -1 && e !== -1 && e > s) {
+    cleaned = cleaned.slice(s, e + 1);
+  }
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    // Regex extraction fallback if a string was ever cut off
+    const kcalM = cleaned.match(/"kcal"\s*:\s*(\d+(?:\.\d+)?)/i);
+    const pM = cleaned.match(/"p"\s*:\s*(\d+(?:\.\d+)?)/i);
+    const cM = cleaned.match(/"c"\s*:\s*(\d+(?:\.\d+)?)/i);
+    const fM = cleaned.match(/"f"\s*:\s*(\d+(?:\.\d+)?)/i);
+    if (kcalM) {
+      return [{
+        name: fallbackName,
+        kcal: Math.round(parseFloat(kcalM[1])),
+        p: pM ? Math.round(parseFloat(pM[1]) * 10) / 10 : 4,
+        c: cM ? Math.round(parseFloat(cM[1])) : 15,
+        f: fM ? Math.round(parseFloat(fM[1])) : 5
+      }];
+    }
+    throw err;
+  }
+}
+
+// Fixed Gemini API Caller: Uses gemini-3.5-flash-lite & gemini-3.8-flash without token truncation
 async function callGeminiFast(apiKey, query) {
-  const candidates = ["models/gemini-3.8-flash-lite", "models/gemini-3.8-flash", "models/gemini-2.5-flash-lite"];
-  const prompt = "You are an expert Indian nutritionist. Parse \"" + query + "\" into exact realistic calories and macros (in grams). Watch out for Indian items like poori, suji/atta halwa, kala chana, soya chaap vs dry soya chunks, manchurian, pinni. Return ONLY raw JSON array: [{\"name\":\"Item\",\"kcal\":100,\"p\":5,\"c\":10,\"f\":3}]";
+  const userModel = state.profile.geminiModel || "models/gemini-3.5-flash-lite";
+  const candidates = [
+    userModel,
+    "models/gemini-3.5-flash-lite",
+    "models/gemini-3.8-flash"
+  ].filter(function(v, idx, arr) { return arr.indexOf(v) === idx; });
+
+  const prompt = "Indian nutritionist: estimate calories and macros in grams for \"" + query + "\". Return ONLY a JSON array: [{\"name\":\"" + query.replace(/"/g, "") + "\",\"kcal\":150,\"p\":6,\"c\":20,\"f\":5}]";
   let lastErr = "";
+
   for (let i = 0; i < candidates.length; i++) {
     const modelName = candidates[i];
     const url = "https://generativelanguage.googleapis.com/v1beta/" + modelName + ":generateContent?key=" + encodeURIComponent(apiKey);
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 200 }
-      })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      let rawText = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || "[]";
-      rawText = rawText.replace(/```json|```/gi, "").trim();
-      const s = rawText.indexOf("[");
-      const e = rawText.lastIndexOf("]");
-      if (s !== -1 && e !== -1) rawText = rawText.slice(s, e + 1);
-      return JSON.parse(rawText);
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.1,
+            responseMimeType: "application/json"
+          }
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const rawText = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || "[]";
+        const parsed = safeParseAIJSON(rawText, query);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          state.profile.geminiModel = modelName;
+          const mInput = document.getElementById("geminiModel");
+          if (mInput) mInput.value = modelName;
+          return parsed;
+        }
+      } else {
+        const errObj = await res.json().catch(function() { return {}; });
+        lastErr = (errObj && errObj.error && errObj.error.message) || ("HTTP " + res.status);
+        // If Google's error message names a replacement model (like models/gemini-3.5-flash-lite), add it to candidates immediately
+        const suggested = lastErr.match(/models\/gemini-[a-z0-9.-]+/i);
+        if (suggested && candidates.indexOf(suggested[0]) === -1) {
+          candidates.push(suggested[0]);
+        }
+      }
+    } catch (netErr) {
+      lastErr = netErr.message;
     }
-    const errObj = await res.json().catch(function() { return {}; });
-    lastErr = (errObj && errObj.error && errObj.error.message) || ("HTTP " + res.status);
   }
-  throw new Error(lastErr);
+  throw new Error(lastErr || "Could not reach Gemini AI.");
 }
 
 async function testGeminiKey() {
@@ -1241,11 +1306,16 @@ async function testGeminiKey() {
   const statusEl = document.getElementById("keyStatus");
   const key = state.profile.geminiKey;
   if (!key || key.length < 15) { statusEl.textContent = "Paste full key first"; return; }
-  statusEl.textContent = "Testing...";
+  statusEl.textContent = "Testing connection...";
   try {
-    const items = await callGeminiFast(key, "1 roasted papad");
-    statusEl.textContent = "✓ Connected (" + (items[0] ? items[0].kcal : 40) + " kcal)";
-  } catch (e) { statusEl.textContent = "Error: " + e.message; }
+    const items = await callGeminiFast(key, "1 bowl mix veg raita");
+    statusEl.style.color = "var(--success)";
+    statusEl.textContent = "✓ Connected via " + state.profile.geminiModel + " (" + (items[0] ? items[0].kcal : 110) + " kcal)";
+    saveState();
+  } catch (e) {
+    statusEl.style.color = "var(--danger)";
+    statusEl.textContent = "Error: " + e.message;
+  }
 }
 
 function extractQuantityAndGrams(str) {
@@ -1271,6 +1341,12 @@ function extractQuantityAndGrams(str) {
 
 function computeSingleFoodPart(cleanPart) {
   const lower = cleanPart.toLowerCase();
+
+  // Check previously AI-learned custom foods first
+  if (state.customFoods && state.customFoods[lower]) {
+    return Object.assign({}, state.customFoods[lower], { name: cleanPart });
+  }
+
   const parsedQty = extractQuantityAndGrams(lower);
   const grams = parsedQty.grams;
   const qty = parsedQty.qty;
@@ -1360,7 +1436,6 @@ async function parseFoodLocally(slotId, presetText) {
       await parseFoodWithAI(slotId, unknownQuery);
       return;
     } else {
-      alert("'" + unknownQuery + "' is not in the offline list. Enter its calories in the Manual box below or add your Gemini API Key in ⚙️ Setup.");
       toggleManualRow(slotId);
       const mName = document.getElementById("m_name_" + slotId);
       if (mName) mName.value = unknownQuery;
@@ -1388,13 +1463,17 @@ async function parseFoodWithAI(slotId, overrideQuery) {
     const items = await callGeminiFast(apiKey, query);
     if (Array.isArray(items) && items.length > 0) {
       items.forEach(function(it) {
-        state.days[state.currentDate].meals[slotId].push({
+        const entry = {
           name: it.name || query,
           kcal: Math.round(Number(it.kcal) || 0),
           p: Math.round(Number(it.p) * 10) / 10 || 0,
           c: Math.round(Number(it.c) || 0),
           f: Math.round(Number(it.f) || 0)
-        });
+        };
+        state.days[state.currentDate].meals[slotId].push(entry);
+        // Save into customFoods dictionary so next time it works in 0.01s offline!
+        if (!state.customFoods) state.customFoods = {};
+        state.customFoods[query.toLowerCase()] = entry;
       });
       if (inputEl) inputEl.value = "";
       state.openSlotId = slotId;
@@ -1402,7 +1481,11 @@ async function parseFoodWithAI(slotId, overrideQuery) {
       renderAll();
     }
   } catch (err) {
-    alert("AI Error: " + err.message);
+    // If Google server is temporarily overloaded, open Manual row pre-filled so user is never blocked
+    toggleManualRow(slotId);
+    const mName = document.getElementById("m_name_" + slotId);
+    if (mName) mName.value = query;
+    alert("AI Note (" + err.message + "). Enter calories in the Manual box opened below.");
   } finally {
     if (btnEl) { btnEl.disabled = false; btnEl.textContent = "✨ AI"; }
   }
@@ -1420,7 +1503,11 @@ function addManualFood(slotId) {
   const c = Math.round(parseFloat(document.getElementById("m_c_" + slotId).value) || 0);
   const f = Math.round(parseFloat(document.getElementById("m_f_" + slotId).value) || 0);
 
-  state.days[state.currentDate].meals[slotId].push({ name: name, kcal: kcal, p: p, c: c, f: f });
+  const entry = { name: name, kcal: kcal, p: p, c: c, f: f };
+  state.days[state.currentDate].meals[slotId].push(entry);
+  if (!state.customFoods) state.customFoods = {};
+  state.customFoods[name.toLowerCase()] = entry;
+
   state.openSlotId = slotId;
   saveState(slotId);
   renderAll();
